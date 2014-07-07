@@ -1,7 +1,7 @@
 import csv
 
 
-def parse(self, file):
+def parse(file):
     content = []
 
     with open(file, 'rb') as csvfile:
