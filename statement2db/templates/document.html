@@ -1,0 +1,7 @@
+<!doctype html>
+<title>file: </title>
+<ul>
+{% for row in content %}
+        <li class="{{ loop.cycle('odd', 'even') }}">{{ row[1] }}</li>
+{% endfor %}
+</ul>
