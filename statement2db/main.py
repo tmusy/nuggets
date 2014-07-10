@@ -1,5 +1,6 @@
 import os
 import flask
+from werkzeug.utils import secure_filename
 from statement2db.csvparser import parse
 
 UPLOAD_FOLDER = '/tmp/uploads'
@@ -22,10 +23,10 @@ def upload():
 
 def do_the_upload(file):
     if file and allowed_file(file.filename):
-        #filename = secure_filename(file.filename)
+        filename = secure_filename(file.filename)
         if not os.path.exists(UPLOAD_FOLDER):
             os.makedirs(UPLOAD_FOLDER)
-        full_filename = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+        full_filename = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         file.save(full_filename)
         content = parse(full_filename)
         #return redirect(url_for('uploaded_file', filename=filename))
