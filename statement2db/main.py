@@ -1,7 +1,10 @@
 import os
+
 import flask
 from werkzeug.utils import secure_filename
-from statement2db.csvparser import parse
+
+from statement2db.lib.parser import parse
+
 
 UPLOAD_FOLDER = '/tmp/uploads'
 ALLOWED_EXTENSIONS = set(['txt', 'csv'])

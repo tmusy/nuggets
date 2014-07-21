@@ -1,7 +1,12 @@
 import csv
 
 
-def parse(file):
+def parse_csv(file):
+    """
+
+    :param file:
+    :return:
+    """
     content = []
 
     with open(file, 'rb') as csvfile:
