@@ -1,7 +1,8 @@
 #!flask/bin/python
 import datetime
-from flask import Flask
-from flask.ext.restful import Resource, Api, fields, marshal_with, abort
+from flask import Flask, request
+#from flask.ext.restful import Resource, Api, fields, marshal_with, abort
+from flask_restful import Api, fields, Resource, marshal_with, abort, reqparse
 
 
 app = Flask(__name__)
@@ -43,6 +44,16 @@ class TransactionResource(Resource):
 
 
 class TransactionListResource(Resource):
+
+    def __init__(self):
+        self.reqparse = reqparse.RequestParser()
+        self.reqparse.add_argument('amount', type=float, required=True,
+            help = 'No amount provided', location='json')
+        self.reqparse.add_argument('currency', type=str, default="CHF", location='json')
+        self.reqparse.add_argument('date', type=datetime, default=datetime.datetime.utcnow(), location='json')
+        self.reqparse.add_argument('description', type=str, default="", location='json')
+        super(TransactionListResource, self).__init__()
+
     @marshal_with(resource_fields)
     def get(self):
         """
@@ -53,6 +64,20 @@ class TransactionListResource(Resource):
         if len(transactions) == 0:
             abort(404, message="No Transactions available")
         return transactions, 200
+
+    @marshal_with(resource_fields)
+    def post(self):
+        """
+        :param
+        :return: transaction_list: [{'id': '', 'date': datetime, 'description': '', 'amount': float, 'currency': ''},...]
+                 REST status code: 201
+        """
+        args = self.reqparse.parse_args(req=request)
+        transaction_dict = {}
+        for k, v in args.iteritems():
+            if v is not None:
+                transaction_dict[k] = v
+        return transaction_dict, 201
 
 
 api.add_resource(TransactionListResource, '/v1.0/transactions', endpoint='transactions')
