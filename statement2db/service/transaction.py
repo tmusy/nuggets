@@ -1,9 +1,11 @@
 #!flask/bin/python
 import datetime
-from flask import Flask, jsonify
-from werkzeug.exceptions import abort
+from flask import Flask
+from flask.ext.restful import Resource, Api, fields, marshal_with, abort
+
 
 app = Flask(__name__)
+api = Api(app)
 
 transactions = [
     {
@@ -22,17 +24,39 @@ transactions = [
     }
 ]
 
-@app.route('/v1.0/transactions', methods=['GET'])
-def get_tasks():
-    return jsonify({'transactions': transactions})
+resource_fields = {
+    'id': fields.Integer,
+    'description': fields.String,
+    'date': fields.DateTime,
+    'amount': fields.Float,
+    'currency': fields.String
+}
 
 
-@app.route('/v1.0/transactions/<int:transaction_id>', methods = ['GET'])
-def get_task(transaction_id):
-    transaction = filter(lambda t: t['id'] == transaction_id, transactions)
-    if len(transaction) == 0:
-        abort(404)
-    return jsonify({'transaction': transaction[0]})
+class TransactionResource(Resource):
+    @marshal_with(resource_fields)
+    def get(self, id):
+        transaction = filter(lambda t: t['id'] == int(id), transactions)
+        if len(transaction) == 0:
+            abort(404, message="Transaction doesn't exist".format(id))
+        return transaction[0]
+
+
+class TransactionListResource(Resource):
+    @marshal_with(resource_fields)
+    def get(self):
+        """
+        :param
+        :return: transaction_list: [{'id': '', 'date': datetime, 'description': '', 'amount': float, 'currency': ''},...]
+                 REST status code: 200
+        """
+        if len(transactions) == 0:
+            abort(404, message="No Transactions available")
+        return transactions, 200
+
+
+api.add_resource(TransactionListResource, '/v1.0/transactions', endpoint='transactions')
+api.add_resource(TransactionResource, '/v1.0/transactions/<string:id>', endpoint='transaction')
 
 
 if __name__ == '__main__':

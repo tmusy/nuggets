@@ -13,4 +13,15 @@ def test_get_existing_course():
 
     res = test_app.get('/v1.0/transactions/' + str(1))
     data = json.loads(res.data)
-    assert res.status_code == 200 and data['transaction']['id'] == 1
+    assert res.status_code == 200 and data['id'] == 1
+
+
+def test_get_courses():
+    # t = Transaction('test_transaction_1')
+    # db_session.add(t)
+    # db_session.commit()
+    # our_transaction = db_session.query(Transaction).filter_by(name='test_transaction_1').first()
+
+    res = test_app.get('/v1.0/transactions')
+    data = json.loads(res.data)
+    assert res.status_code == 200 and len(data) == 2
