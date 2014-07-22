@@ -24,6 +24,7 @@ def upload():
     else:
         return show_the_upload_form()
 
+
 def do_the_upload(file):
     if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
@@ -35,9 +36,11 @@ def do_the_upload(file):
         #return redirect(url_for('uploaded_file', filename=filename))
     return flask.render_template('document.html', content=content)
 
+
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
+
 
 def show_the_upload_form():
     return flask.render_template('upload.html')
