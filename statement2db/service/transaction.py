@@ -1,32 +1,19 @@
 #!flask/bin/python
 import datetime
 from flask import Flask, request
-#from flask.ext.restful import Resource, Api, fields, marshal_with, abort
 from flask_restful import Api, fields, Resource, marshal_with, abort, reqparse
+
+from statement2db.database import db_session
+from statement2db.model import Transaction
 
 
 app = Flask(__name__)
 api = Api(app)
 
-transactions = [
-    {
-        'id': 1,
-        'date': datetime.datetime.utcnow(),
-        'amount': 10.50,
-        'currency': 'CHF',
-        'description': u'Coop Oerlikon'
-    },
-    {
-        'id': 2,
-        'date': datetime.datetime.utcnow(),
-        'amount': 150.00,
-        'currency': 'CHF',
-        'description': u'Migros Wint'
-    }
-]
 
-resource_fields = {
+transaction_fields = {
     'id': fields.Integer,
+    'name': fields.String,
     'description': fields.String,
     'date': fields.DateTime,
     'amount': fields.Float,
@@ -35,12 +22,28 @@ resource_fields = {
 
 
 class TransactionResource(Resource):
-    @marshal_with(resource_fields)
+    def __init__(self):
+        # reqparse to ensure well-formed arguments passed by the request
+        self.reqparse = reqparse.RequestParser()
+        self.reqparse.add_argument('amount', type=int, default=0, location='json')
+        self.reqparse.add_argument('currency', type=str, default="CHF", location='json')
+        self.reqparse.add_argument('date', type=datetime, default=datetime.datetime.utcnow(), location='json')
+        self.reqparse.add_argument('name', type=str, default='', location='json')
+        self.reqparse.add_argument('description', type=str, default='', location='json')
+        super(TransactionResource, self).__init__()
+
+    @marshal_with(transaction_fields)
     def get(self, id):
-        transaction = filter(lambda t: t['id'] == int(id), transactions)
-        if len(transaction) == 0:
-            abort(404, message="Transaction doesn't exist".format(id))
-        return transaction[0]
+        """
+        :param   id
+        :return: transaction_dict: {'id': str, 'amount': int, 'currency': str, 'date': datetime,
+        'name': str, 'description': str}
+                 REST status ok code: 200
+        """
+        transaction = db_session.query(Transaction).filter_by(id=int(id)).first()
+        if not transaction:
+            abort(404, message="Transaction {0} doesn't exist".format(id))
+        return transaction
 
 
 class TransactionListResource(Resource):
@@ -51,10 +54,11 @@ class TransactionListResource(Resource):
             help = 'No amount provided', location='json')
         self.reqparse.add_argument('currency', type=str, default="CHF", location='json')
         self.reqparse.add_argument('date', type=datetime, default=datetime.datetime.utcnow(), location='json')
+        self.reqparse.add_argument('name', type=str, default='', location='json')
         self.reqparse.add_argument('description', type=str, default="", location='json')
         super(TransactionListResource, self).__init__()
 
-    @marshal_with(resource_fields)
+    @marshal_with(transaction_fields)
     def get(self):
         """
         :param
