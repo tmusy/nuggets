@@ -1,15 +1,25 @@
 import json
+from statement2db.database import init_db, clear_db, db_session
+from statement2db.model import Transaction
 from statement2db.service.transaction import app
 
 
 test_app = app.test_client()
 
 
+def setup():
+    init_db()
+
+
+def teardown():
+    clear_db()
+
+
 def test_get_existing_transaction():
-    # t = Transaction('test_transaction_1')
-    # db_session.add(t)
-    # db_session.commit()
-    # our_transaction = db_session.query(Transaction).filter_by(name='test_transaction_1').first()
+    t = Transaction(10,name='test_transaction_1')
+    db_session.add(t)
+    db_session.commit()
+    our_transaction = db_session.query(Transaction).filter_by(name='test_transaction_1').first()
 
     res = test_app.get('/v1.0/transactions/' + str(1))
     data = json.loads(res.data)
@@ -17,10 +27,10 @@ def test_get_existing_transaction():
 
 
 def test_get_transactions():
-    # t = Transaction('test_transaction_1')
-    # db_session.add(t)
-    # db_session.commit()
-    # our_transaction = db_session.query(Transaction).filter_by(name='test_transaction_1').first()
+    t = Transaction(10,name='test_transaction_1')
+    db_session.add(t)
+    db_session.commit()
+    our_transaction = db_session.query(Transaction).filter_by(name='test_transaction_1').first()
 
     res = test_app.get('/v1.0/transactions')
     data = json.loads(res.data)

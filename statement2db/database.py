@@ -3,7 +3,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import scoped_session, sessionmaker
 
 
-engine = create_engine('mysql://state_man:2db-stM14@localhost/statement2db')
+engine = create_engine('mysql://state_man:2db-stM14@127.0.0.1/statement2db')
 db_session = scoped_session(sessionmaker(autocommit=False,
                                          autoflush=False,
                                          bind=engine))

@@ -62,14 +62,16 @@ class TransactionListResource(Resource):
     def get(self):
         """
         :param
-        :return: transaction_list: [{'id': '', 'date': datetime, 'description': '', 'amount': float, 'currency': ''},...]
+        :return: transaction_list: [{'id': str, 'amount': int, 'currency': str, 'date': datetime,
+        'name': str, 'description': str},...]
                  REST status code: 200
         """
-        if len(transactions) == 0:
+        transactions = db_session.query(Transaction).all()
+        if not transactions:
             abort(404, message="No Transactions available")
         return transactions, 200
 
-    @marshal_with(resource_fields)
+    @marshal_with(transaction_fields)
     def post(self):
         """
         :param
@@ -81,6 +83,9 @@ class TransactionListResource(Resource):
         for k, v in args.iteritems():
             if v is not None:
                 transaction_dict[k] = v
+        transaction = Transaction(**transaction_dict)
+        db_session.add(transaction)
+        db_session.commit()
         return transaction_dict, 201
 
 
