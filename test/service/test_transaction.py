@@ -13,7 +13,8 @@ def setup():
 
 
 def teardown():
-    clear_db()
+    #clear_db()
+    pass
 
 
 @with_setup(setup, teardown)

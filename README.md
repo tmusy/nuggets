@@ -1,7 +1,7 @@
 # statement2db
 
 statement2db is Flask application that reads bank statements in a csv format and returns
-a JOSON object with the extracted information.
+a JSON object with the extracted information.
 
 ## Development Environment
 

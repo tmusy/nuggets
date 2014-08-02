@@ -5,10 +5,7 @@ from flask_restful import Api, fields, Resource, marshal_with, abort, reqparse
 
 from statement2db.database import db_session
 from statement2db.model import Transaction
-
-
-app = Flask(__name__)
-api = Api(app)
+from statement2db.app import app, api
 
 
 transaction_fields = {
