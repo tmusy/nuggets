@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>EPaaS - Admin</title>
+<title>S2D</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
@@ -12,151 +12,14 @@
 <body>
     <div class="navbar">
         <div class="navbar-inner">
-            <a class="brand" href="#">S2D</a>
+            <a class="brand" href="index.html">S2D</a>
+            <a href="transaction.html">Transactions</a>
+            <a href="account.html">Accounts</a>
         </div>
     </div>
     <div id="main" class="container">
-        <h1>Transactions</h1>
-        <table class="table table-striped">
-            <tr><td style="width: 1px;"></td><td><b>Transaction</b></td><td><b>Options</b></td></tr>
-            <!-- ko foreach: transactions -->
-            <tr>
-                <td>
-                    <!-- <span data-bind="visible: active" class="label label-success">Active</span>
-                    <span data-bind="visible: !active()" class="label label-danger">Closed</span> -->
-                </td>
-                <td><p><b data-bind="text: name"></b></p><p data-bind="text: description"></p></td>
-                <td>
-                    <button data-bind="click: $parent.beginEdit" class="btn">Edit</button>
-                    <button data-bind="click: $parent.remove" class="btn">Delete</button>
-                </td>
-            </tr>
-            <!-- /ko -->
-        </table>
-        <button data-bind="click: beginAdd" class="btn">Add Transaction</button>
+        Welcome
     </div>
 
-    <div id="add" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="addDialogLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                    <h3 id="addDialogLabel">Add Transaction</h3>
-                </div>
-                <div class="modal-body">
-                    <form class="form-horizontal">
-                        <div class="control-group">
-                            <label class="control-label" for="inputtransaction">Transaction</label>
-                            <div class="controls">
-                                <input data-bind="value: name" type="text" id="inputTransaction" placeholder="Transaction name" style="width: 150px;">
-                            </div>
-                        </div>
-                        <div class="control-group">
-                            <label class="control-label" for="inputDescription">Description</label>
-                            <div class="controls">
-                                <input data-bind="value: description" type="text" id="inputDescription" placeholder="Description" style="width: 300px;">
-                            </div>
-                        </div>
-                    </form>
-                </div>
-
-                <div class="modal-footer">
-                    <button data-bind="click: addTransaction" class="btn btn-primary">Add Transaction</button>
-                    <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <script type="text/javascript">
-
-        function TransactionsViewModel() {
-            var self = this;
-            self.transactionsURI = 'http://127.0.0.1:5000/v1.0/transactions';
-            self.transactions = ko.observableArray();
-
-            /* helper that wraps the jquery $.ajax() call */
-            self.ajax = function(uri, method, data) {
-                var request = {
-                    url: uri,
-                    type: method,
-                    contentType: "application/json",
-                    accepts: "application/json",
-                    cache: false,
-                    dataType: 'json',
-                    data: JSON.stringify(data),
-
-                    /* call back methods */
-                    beforeSend: function (xhr) {
-                        xhr.setRequestHeader('X-Test-Header', 'test-value');
-                    },
-                    error: function(jqXHR) {
-                        console.log("ajax error " + jqXHR.status);
-                    }
-                };
-                return $.ajax(request);
-            }
-            
-            self.beginAdd = function() {
-                $('#add').modal('show');
-            }
-            self.beginEdit = function(transaction) {
-                alert("Edit: " + transaction.name());
-            }
-            self.remove = function(transaction) {
-                alert("Remove: " + transaction.name());
-            }
-            self.markInProgress = function(transaction) {
-                transaction.done(false);
-            }
-            self.markDone = function(transaction) {
-                transaction.done(true);
-            }
-
-            /* do the ajax request and consume the data */
-            self.ajax(self.transactionsURI, 'GET').done(function(data) {
-                for (var i = 0; i < data.length; i++) {
-                    self.transactions.push({
-                        uri: ko.observable(data[i].uri),
-                        name: ko.observable(data[i].name),
-                        description: ko.observable(data[i].description)
-//                        done: ko.observable(data.courses[i].done)
-                    });
-                }
-            });
-
-            self.add = function(transaction) {
-                self.ajax(self.transactionsURI, 'POST', transaction).done(function(data) {
-                    self.transactions.push({
-                        uri: ko.observable(data.uri),
-                        name: ko.observable(data.name),
-                        description: ko.observable(data.description)
-//                        done: ko.observable(data.transaction.done)
-                    });
-                });
-            }
-        }
-
-        function AddTransactionViewModel() {
-            var self = this;
-            self.name = ko.observable();
-            self.description = ko.observable();
-
-            self.addTransaction = function() {
-                $('#add').modal('hide');
-                transactionsViewModel.add({
-                    name: self.name(),
-                    description: self.description()
-                });
-                self.name("");
-                self.description("");
-            }
-        }
-
-        var transactionsViewModel = new TransactionsViewModel();
-        var addTransactionViewModel = new AddTransactionViewModel();
-        ko.applyBindings(transactionsViewModel, $('#main')[0]);
-        ko.applyBindings(addTransactionViewModel, $('#add')[0]);
-
-    </script>
 </body>
 </html>

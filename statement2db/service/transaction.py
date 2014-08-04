@@ -1,15 +1,15 @@
 #!flask/bin/python
 import datetime
-from flask import Flask, request
-from flask_restful import Api, fields, Resource, marshal_with, abort, reqparse
+from flask import request
+from flask_restful import fields, Resource, marshal_with, abort, reqparse
 
+from statement2db.app import app, api
 from statement2db.database import db_session
 from statement2db.model import Transaction
-from statement2db.app import app, api
 
 
 transaction_fields = {
-    #'uri': fields.Url('transaction'),
+    'uri': fields.Url('transaction'),
     'id': fields.Integer,
     'amount': fields.Integer,
     'currency': fields.String,
@@ -25,7 +25,7 @@ class TransactionResource(Resource):
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument('amount', type=int, default=None, location='json')
         self.reqparse.add_argument('currency', type=str, default=None, location='json')
-        self.reqparse.add_argument('date', type=datetime, default=datetime.datetime.utcnow(), location='json')
+        self.reqparse.add_argument('date', type=datetime, default=None, location='json')
         self.reqparse.add_argument('name', type=str, default=None, location='json')
         self.reqparse.add_argument('description', type=str, default=None, location='json')
         super(TransactionResource, self).__init__()
@@ -118,7 +118,7 @@ class TransactionListResource(Resource):
         transaction = Transaction(**transaction_dict)
         db_session.add(transaction)
         db_session.commit()
-        return transaction_dict, 201
+        return transaction, 201
 
 
 api.add_resource(TransactionListResource, '/v1.0/transactions', endpoint='transactions')
