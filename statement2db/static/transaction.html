@@ -22,15 +22,16 @@
         <h1>Transactions</h1>
         <table class="table table-striped">
             <tr><td style="width: 1px;"></td>
-                <td><b>Date</b></td><td><b>Transaction</b></td><td><b>Options</b></td></tr>
+                <td><b>Date</b></td><td><b>Transaction</b></td><td><b>Amount</b></td><td><b>Options</b></td></tr>
             <!-- ko foreach: transactions -->
             <tr>
                 <td>
                     <!-- <span data-bind="visible: active" class="label label-success">Active</span>
                     <span data-bind="visible: !active()" class="label label-danger">Closed</span> -->
                 </td>
-                <td><p data-bind="text: moment(date).format('llll')"></p></td>
+                <td><p data-bind="text: moment(date()).format('ddd, DD MMM YYYY HH:mm')"></p></td>
                 <td><p><b data-bind="text: name"></b></p><p data-bind="text: description"></p></td>
+                <td><p data-bind="text: amount"></p></td>
                 <td>
                     <button data-bind="click: $parent.beginEdit" class="btn">Edit</button>
                     <button data-bind="click: $parent.remove" class="btn">Delete</button>
@@ -134,7 +135,8 @@
                         uri: ko.observable(data[i].uri),
                         date: ko.observable(data[i].date),
                         name: ko.observable(data[i].name),
-                        description: ko.observable(data[i].description)
+                        description: ko.observable(data[i].description),
+                        amount: ko.observable(data[i].amount)
 //                        done: ko.observable(data.courses[i].done)
                     });
                 }
@@ -145,7 +147,8 @@
                     self.transactions.push({
                         uri: ko.observable(data.uri),
                         name: ko.observable(data.name),
-                        description: ko.observable(data.description)
+                        description: ko.observable(data.description),
+                        amount: ko.observable(data.amount)
 //                        done: ko.observable(data.transaction.done)
                     });
                 });

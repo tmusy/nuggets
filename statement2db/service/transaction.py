@@ -23,19 +23,19 @@ class TransactionResource(Resource):
     def __init__(self):
         # reqparse to ensure well-formed arguments passed by the request
         self.reqparse = reqparse.RequestParser()
-        self.reqparse.add_argument('amount', type=int, default=None, location='json')
-        self.reqparse.add_argument('currency', type=str, default=None, location='json')
-        self.reqparse.add_argument('date', type=datetime, default=None, location='json')
-        self.reqparse.add_argument('name', type=str, default=None, location='json')
-        self.reqparse.add_argument('description', type=str, default=None, location='json')
+        self.reqparse.add_argument('amount', type=int, location='json')
+        self.reqparse.add_argument('currency', type=str, location='json')
+        self.reqparse.add_argument('date', type=datetime, location='json')
+        self.reqparse.add_argument('name', type=str, location='json')
+        self.reqparse.add_argument('description', type=str, location='json')
         super(TransactionResource, self).__init__()
 
     @marshal_with(transaction_fields)
     def get(self, id):
         """
         :param   id
-        :return: transaction_dict: {'id': str, 'amount': int, 'currency': str, 'date': datetime,
-        'name': str, 'description': str}
+        :return: transaction as JSON: {'id': '', 'amount': 0, 'currency': '', 'date': datetime,
+        'name': '', 'description': ''}
                  REST status ok code: 200
         """
         transaction = db_session.query(Transaction).filter_by(id=int(id)).first()
@@ -60,7 +60,7 @@ class TransactionResource(Resource):
         """
         :param   id
                  request: {'id': '', 'amount': 0, 'currency': '', 'name': '', 'description': ''}
-        :return: transaction_dict: {'id': '', 'amount': 0, 'currency': '', 'name': '', 'description': ''}
+        :return: transaction as JSON: {'id': '', 'amount': 0, 'currency': '', 'name': '', 'description': ''}
                  REST status ok code: 201
         """
         transaction = db_session.query(Transaction).filter_by(id=int(id)).first()
@@ -75,7 +75,7 @@ class TransactionResource(Resource):
                 transaction.__setattr__(k, v)
 
         db_session.commit()
-        return transaction_dict, 201
+        return transaction, 201
 
 
 class TransactionListResource(Resource):
@@ -84,18 +84,18 @@ class TransactionListResource(Resource):
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument('amount', type=int, required=True,
             help = 'No amount provided', location='json')
-        self.reqparse.add_argument('currency', type=str, default="CHF", location='json')
-        self.reqparse.add_argument('date', type=datetime, default=datetime.datetime.utcnow(), location='json')
-        self.reqparse.add_argument('name', type=str, default='', location='json')
-        self.reqparse.add_argument('description', type=str, default="", location='json')
+        self.reqparse.add_argument('currency', type=str, location='json')
+        self.reqparse.add_argument('date', type=datetime, location='json')
+        self.reqparse.add_argument('name', type=str, location='json')
+        self.reqparse.add_argument('description', type=str, location='json')
         super(TransactionListResource, self).__init__()
 
     @marshal_with(transaction_fields)
     def get(self):
         """
         :param
-        :return: transaction_list: [{'id': str, 'amount': int, 'currency': str, 'date': datetime,
-        'name': str, 'description': str},...]
+        :return: transactions as JSON: [{'id': '', 'amount': 0, 'currency': '',
+        'date': datetime, 'name': '', 'description': ''},...]
                  REST status code: 200
         """
         transactions = db_session.query(Transaction).all()
@@ -107,7 +107,8 @@ class TransactionListResource(Resource):
     def post(self):
         """
         :param
-        :return: transaction_list: [{'id': '', 'date': datetime, 'description': '', 'amount': float, 'currency': ''},...]
+        :return: transaction as JSON: {'id': '', 'amount': 0, 'currency': '',
+        'date': datetime, 'name': '', 'description': '', }
                  REST status code: 201
         """
         args = self.reqparse.parse_args(req=request)
