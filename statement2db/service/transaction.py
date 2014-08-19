@@ -6,6 +6,8 @@ from flask_restful import fields, Resource, marshal_with, abort, reqparse
 from statement2db.app import app, api
 from statement2db.database import db_session
 from statement2db.model import Transaction
+from statement2db.service.account import account_fields
+import statement2db.service.account
 
 
 transaction_fields = {
@@ -15,7 +17,9 @@ transaction_fields = {
     'currency': fields.String,
     'date': fields.DateTime,
     'name': fields.String,
-    'description': fields.String
+    'description': fields.String,
+    'credit': fields.List(fields.Nested(account_fields)),
+    'debit': fields.List(fields.Nested(account_fields))
 }
 
 

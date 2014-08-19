@@ -11,6 +11,7 @@ account_fields = {
     'uri': fields.Url('account'),
     'id': fields.Integer,
     'name': fields.String,
+    'type': fields.String,
     'description': fields.String
 }
 
@@ -20,6 +21,7 @@ class AccountResource(Resource):
         # reqparse to ensure well-formed arguments passed by the request
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument('name', type=str, location='json')
+        self.reqparse.add_argument('type', type=str, location='json')
         self.reqparse.add_argument('description', type=str, location='json')
         super(AccountResource, self).__init__()
 
@@ -75,6 +77,7 @@ class AccountListResource(Resource):
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument('name', type=str, required=True, location='json')
+        self.reqparse.add_argument('type', type=str, location='json')
         self.reqparse.add_argument('description', type=str, location='json')
         super(AccountListResource, self).__init__()
 

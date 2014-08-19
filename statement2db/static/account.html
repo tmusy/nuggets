@@ -18,19 +18,15 @@
         </div>
     </div>
     <div id="main" class="container">
-        <h1>Transactions</h1>
+        <h1>Accounts</h1>
         <table class="table table-striped">
             <tr><td style="width: 1px;"></td>
-                <td><b>Date</b></td><td><b>Transaction</b></td><td><b>Amount</b></td><td><b>Options</b></td></tr>
-            <!-- ko foreach: transactions -->
+                <td><b>Account</b></td><td><b>Type</b></td><td><b>Options</b></td></tr>
+            <!-- ko foreach: accounts -->
             <tr>
-                <td>
-                    <!-- <span data-bind="visible: active" class="label label-success">Active</span>
-                    <span data-bind="visible: !active()" class="label label-danger">Closed</span> -->
-                </td>
-                <td><p data-bind="text: moment(date()).format('ddd, DD MMM YYYY HH:mm')"></p></td>
+                <td></td>
                 <td><p><b data-bind="text: name"></b></p><p data-bind="text: description"></p></td>
-                <td><p data-bind="text: amount"></p></td>
+                <td><p data-bind="text: type"></p></td>
                 <td>
                     <button data-bind="click: $parent.beginEdit" class="btn">Edit</button>
                     <button data-bind="click: $parent.remove" class="btn">Delete</button>
@@ -38,7 +34,7 @@
             </tr>
             <!-- /ko -->
         </table>
-        <button data-bind="click: beginAdd" class="btn">Add Transaction</button>
+        <button data-bind="click: beginAdd" class="btn">Add Account</button>
     </div>
 
     <div id="add" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="addDialogLabel" aria-hidden="true">
@@ -46,20 +42,20 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                    <h3 id="addDialogLabel">Add Transaction</h3>
+                    <h3 id="addDialogLabel">Add Account</h3>
                 </div>
                 <div class="modal-body">
                     <form class="form-horizontal">
                         <div class="control-group">
-                            <label class="control-label" for="inputAmount">Amount</label>
+                            <label class="control-label" for="inputAccount">Account</label>
                             <div class="controls">
-                                <input data-bind="value: amount" type="text" id="inputAmount" placeholder="Amount" style="width: 150px;">
+                                <input data-bind="value: name" type="text" id="inputAccount" placeholder="Account" style="width: 250px;">
                             </div>
                         </div>
                         <div class="control-group">
-                            <label class="control-label" for="inputTransaction">Transaction</label>
+                            <label class="control-label" for="inputType">Type</label>
                             <div class="controls">
-                                <input data-bind="value: name" type="text" id="inputTransaction" placeholder="Transaction name" style="width: 150px;">
+                                <input data-bind="value: type" type="text" id="inputType" placeholder="Account Type" style="width: 250px;">
                             </div>
                         </div>
                         <div class="control-group">
@@ -72,7 +68,7 @@
                 </div>
 
                 <div class="modal-footer">
-                    <button data-bind="click: addTransaction" class="btn btn-primary">Add Transaction</button>
+                    <button data-bind="click: addAccount" class="btn btn-primary">Add Account</button>
                     <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
                 </div>
             </div>
@@ -80,10 +76,10 @@
     </div>
     <script type="text/javascript">
 
-        function TransactionsViewModel() {
+        function AccountsViewModel() {
             var self = this;
-            self.transactionsURI = 'http://127.0.0.1:5000/v1.0/transactions';
-            self.transactions = ko.observableArray();
+            self.accountsURI = 'http://127.0.0.1:5000/v1.0/accounts';
+            self.accounts = ko.observableArray();
 
             /* helper that wraps the jquery $.ajax() call */
             self.ajax = function(uri, method, data) {
@@ -110,73 +106,64 @@
             self.beginAdd = function() {
                 $('#add').modal('show');
             }
-            self.beginEdit = function(transaction) {
-                alert("Edit: " + transaction.name());
+            self.beginEdit = function(account) {
+                alert("Edit: " + account.name());
             }
-            self.remove = function(transaction) {
-                self.ajax(transaction.uri(), 'DELETE').done(function(data) {
-                    self.transactions.remove(transaction);
+            self.remove = function(account) {
+                self.ajax(account.uri(), 'DELETE').done(function(data) {
+                    self.accounts.remove(account);
                 });
-            }
-            self.markInProgress = function(transaction) {
-                transaction.done(false);
-            }
-            self.markDone = function(transaction) {
-                transaction.done(true);
             }
 
             /*  Do the ajax request and consume the data.
                 Get the list of transactions the server.
             */
-            self.ajax(self.transactionsURI, 'GET').done(function(data) {
+            self.ajax(self.accountsURI, 'GET').done(function(data) {
                 for (var i = 0; i < data.length; i++) {
-                    self.transactions.push({
+                    self.accounts.push({
                         uri: ko.observable(data[i].uri),
-                        date: ko.observable(data[i].date),
                         name: ko.observable(data[i].name),
-                        description: ko.observable(data[i].description),
-                        amount: ko.observable(data[i].amount)
-//                        done: ko.observable(data.courses[i].done)
+                        type: ko.observable(data[i].type),
+                        description: ko.observable(data[i].description)
                     });
                 }
             });
 
-            self.add = function(transaction) {
-                self.ajax(self.transactionsURI, 'POST', transaction).done(function(data) {
-                    self.transactions.push({
+            self.add = function(account) {
+                self.ajax(self.accountsURI, 'POST', account).done(function(data) {
+                    self.accounts.push({
                         uri: ko.observable(data.uri),
                         name: ko.observable(data.name),
-                        description: ko.observable(data.description),
-                        amount: ko.observable(data.amount)
-//                        done: ko.observable(data.transaction.done)
+                        type: ko.observable(data.type),
+                        description: ko.observable(data.description)
                     });
                 });
             }
         }
 
-        function AddTransactionViewModel() {
+        function AddAccountViewModel() {
             var self = this;
-            self.amount = ko.observable();
             self.name = ko.observable();
+            self.type = ko.observable();
             self.description = ko.observable();
 
-            self.addTransaction = function() {
+            self.addAccount = function() {
                 $('#add').modal('hide');
-                transactionsViewModel.add({
-                    amount: self.amount(),
+                accountsViewModel.add({
                     name: self.name(),
+                    type: self.type(),
                     description: self.description()
                 });
-                self.amount(0);
                 self.name("");
+                self.type("");
                 self.description("");
             }
         }
 
-        var transactionsViewModel = new TransactionsViewModel();
-        var addTransactionViewModel = new AddTransactionViewModel();
-        ko.applyBindings(transactionsViewModel, $('#main')[0]);
-        ko.applyBindings(addTransactionViewModel, $('#add')[0]);
+        var accountsViewModel = new AccountsViewModel();
+        var addAccountViewModel = new AddAccountViewModel();
+        ko.applyBindings(accountsViewModel, $('#main')[0]);
+        ko.applyBindings(addAccountViewModel, $('#add')[0]);
 
     </script>
 </body>
