@@ -51,9 +51,16 @@
                 <div class="modal-body">
                     <form class="form-horizontal">
                         <div class="control-group">
+                            <label class="control-label" for="inputDate">Date</label>
+                            <div class="controls">
+                                <input data-bind="value: date" type="date" id="inputDate" placeholder="" style="width: 150px;">
+                            </div>
+                        </div>
+                        <div class="control-group">
                             <label class="control-label" for="inputAmount">Amount</label>
                             <div class="controls">
                                 <input data-bind="value: amount" type="text" id="inputAmount" placeholder="Amount" style="width: 150px;">
+                                <input data-bind="value: currency" type="text" placeholder="CHF" style="width: 50px;">
                             </div>
                         </div>
                         <div class="control-group">
@@ -118,12 +125,6 @@
                     self.transactions.remove(transaction);
                 });
             }
-            self.markInProgress = function(transaction) {
-                transaction.done(false);
-            }
-            self.markDone = function(transaction) {
-                transaction.done(true);
-            }
 
             /*  Do the ajax request and consume the data.
                 Get the list of transactions the server.
@@ -145,6 +146,7 @@
                 self.ajax(self.transactionsURI, 'POST', transaction).done(function(data) {
                     self.transactions.push({
                         uri: ko.observable(data.uri),
+                        date: ko.observable(data.date),
                         name: ko.observable(data.name),
                         description: ko.observable(data.description),
                         amount: ko.observable(data.amount)
@@ -156,18 +158,25 @@
 
         function AddTransactionViewModel() {
             var self = this;
+            self.date = ko.observable();
             self.amount = ko.observable();
+            self.currency = ko.observable();
             self.name = ko.observable();
             self.description = ko.observable();
 
             self.addTransaction = function() {
                 $('#add').modal('hide');
                 transactionsViewModel.add({
+                	date: self.date(),
                     amount: self.amount(),
+                    currency: self.currency(),
                     name: self.name(),
-                    description: self.description()
+                    description: self.description(),
+                    debit: {"name": "Bank"}
                 });
+                self.date("");
                 self.amount(0);
+                self.currency("");
                 self.name("");
                 self.description("");
             }

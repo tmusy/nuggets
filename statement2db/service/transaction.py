@@ -1,11 +1,11 @@
 #!flask/bin/python
-import datetime
+import dateutil.parser
 from flask import request
 from flask_restful import fields, Resource, marshal_with, abort, reqparse
 
 from statement2db.app import app, api
 from statement2db.database import db_session
-from statement2db.model import Transaction
+from statement2db.model import Transaction, Account
 from statement2db.service.account import account_fields
 import statement2db.service.account
 
@@ -13,7 +13,7 @@ import statement2db.service.account
 transaction_fields = {
     'uri': fields.Url('transaction'),
     'id': fields.Integer,
-    'amount': fields.Integer,
+    'amount': fields.Float,
     'currency': fields.String,
     'date': fields.DateTime,
     'name': fields.String,
@@ -27,11 +27,11 @@ class TransactionResource(Resource):
     def __init__(self):
         # reqparse to ensure well-formed arguments passed by the request
         self.reqparse = reqparse.RequestParser()
-        self.reqparse.add_argument('amount', type=int, location='json')
-        self.reqparse.add_argument('currency', type=str, location='json')
-        self.reqparse.add_argument('date', type=datetime, location='json')
-        self.reqparse.add_argument('name', type=str, location='json')
-        self.reqparse.add_argument('description', type=str, location='json')
+        self.reqparse.add_argument('amount', type=float, location='json')
+        self.reqparse.add_argument('currency', type=unicode, location='json')
+        self.reqparse.add_argument('date', type=unicode, location='json')
+        self.reqparse.add_argument('name', type=unicode, location='json')
+        self.reqparse.add_argument('description', type=unicode, location='json')
         super(TransactionResource, self).__init__()
 
     @marshal_with(transaction_fields)
@@ -75,6 +75,8 @@ class TransactionResource(Resource):
         transaction_dict = {}
         for k, v in args.iteritems():
             if v is not None:
+                if k == 'date':
+                    v = dateutil.parser.parse(v)
                 transaction_dict[k] = v
                 transaction.__setattr__(k, v)
 
@@ -86,12 +88,13 @@ class TransactionListResource(Resource):
 
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
-        self.reqparse.add_argument('amount', type=int, required=True,
+        self.reqparse.add_argument('amount', type=float, required=True,
             help = 'No amount provided', location='json')
-        self.reqparse.add_argument('currency', type=str, location='json')
-        self.reqparse.add_argument('date', type=datetime, location='json')
-        self.reqparse.add_argument('name', type=str, location='json')
-        self.reqparse.add_argument('description', type=str, location='json')
+        self.reqparse.add_argument('currency', type=unicode, location='json')
+        self.reqparse.add_argument('date', type=unicode, location='json')
+        self.reqparse.add_argument('name', type=unicode, location='json')
+        self.reqparse.add_argument('description', type=unicode, location='json')
+        self.reqparse.add_argument('debit', type=dict, location='json')
         super(TransactionListResource, self).__init__()
 
     @marshal_with(transaction_fields)
@@ -117,10 +120,27 @@ class TransactionListResource(Resource):
         """
         args = self.reqparse.parse_args(req=request)
         transaction_dict = {}
+        debit = None
+        credit = None
         for k, v in args.iteritems():
-            if v is not None:
+            if v:
                 transaction_dict[k] = v
+
+        if 'date' in transaction_dict:
+            transaction_dict['date'] = dateutil.parser.parse(transaction_dict['date'])
+        if 'debit' in transaction_dict:
+            debit = transaction_dict.pop('debit')
+        if 'credit' in transaction_dict:
+            credit = transaction_dict.pop('credit')
+
         transaction = Transaction(**transaction_dict)
+
+        if debit:
+            account = db_session.query(Account).filter_by(name=debit['name']).first()
+            transaction.debit = account
+        if credit:
+            account = db_session.query_property(Account).filter_by(name=credit['name']).first()
+            transaction.credit = account
         db_session.add(transaction)
         db_session.commit()
         return transaction, 201

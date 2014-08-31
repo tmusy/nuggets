@@ -20,9 +20,9 @@ class AccountResource(Resource):
     def __init__(self):
         # reqparse to ensure well-formed arguments passed by the request
         self.reqparse = reqparse.RequestParser()
-        self.reqparse.add_argument('name', type=str, location='json')
-        self.reqparse.add_argument('type', type=str, location='json')
-        self.reqparse.add_argument('description', type=str, location='json')
+        self.reqparse.add_argument('name', type=unicode, location='json')
+        self.reqparse.add_argument('type', type=unicode, location='json')
+        self.reqparse.add_argument('description', type=unicode, location='json')
         super(AccountResource, self).__init__()
 
     @marshal_with(account_fields)
@@ -76,9 +76,9 @@ class AccountListResource(Resource):
 
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
-        self.reqparse.add_argument('name', type=str, required=True, location='json')
-        self.reqparse.add_argument('type', type=str, location='json')
-        self.reqparse.add_argument('description', type=str, location='json')
+        self.reqparse.add_argument('name', type=unicode, required=True, location='json')
+        self.reqparse.add_argument('type', type=unicode, location='json')
+        self.reqparse.add_argument('description', type=unicode, location='json')
         super(AccountListResource, self).__init__()
 
     @marshal_with(account_fields)
@@ -88,7 +88,11 @@ class AccountListResource(Resource):
         :return: accounts as JSON: [{'id': '', 'name': '', 'description': ''},...]
                  REST status code: 200
         """
-        accounts = db_session.query(Account).all()
+        index = request.args.get('index', 0)
+        count = request.args.get('count', 5)
+        order_by = request.args.get('order', 'name')
+        accounts = db_session.query(Account).order_by(order_by).offset(index).limit(count).all()
+        #accounts = db_session.query(Account).all()
         if not accounts:
             abort(404, message="No Accounts available")
         return accounts, 200

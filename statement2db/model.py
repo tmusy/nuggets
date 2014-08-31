@@ -1,18 +1,21 @@
 from datetime import datetime
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, Unicode, DateTime, ForeignKey, Float
+from sqlalchemy.orm import relationship
 from statement2db.database import Base
 
 
 class Transaction(Base):
     __tablename__ = 'trx'
     id = Column(Integer, primary_key=True)
-    amount = Column(Integer)
-    currency = Column(String(4))
+    amount = Column(Float)
+    currency = Column(Unicode(4))
     date = Column(DateTime)
-    name = Column(String(240), unique=True)
-    description = Column(String(1024))
-    debit = Column(Integer, ForeignKey('account.id'))
-    credit = Column(Integer, ForeignKey('account.id'))
+    name = Column(Unicode(240), unique=True)
+    description = Column(Unicode(1024))
+    debit_id = Column(Integer, ForeignKey('account.id'))
+    credit_id = Column(Integer, ForeignKey('account.id'))
+    debit = relationship("Account", primaryjoin = "Transaction.debit_id == Account.id")
+    credit = relationship("Account", primaryjoin = "Transaction.credit_id == Account.id")
 
     def __init__(self, amount, currency='CHF', date=datetime.utcnow(), name=None, description=None):
         self.amount = amount
@@ -28,9 +31,9 @@ class Transaction(Base):
 class Account(Base):
     __tablename__ = 'account'
     id = Column(Integer, primary_key=True)
-    name = Column(String(40))
-    description = Column(String(1024))
-    type = Column(String(16))
+    name = Column(Unicode(40))
+    description = Column(Unicode(1024))
+    type = Column(Unicode(16))
 
     def __init__(self, name, description=None, type=None):
         self.name = name

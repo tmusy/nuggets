@@ -6,6 +6,7 @@
 <link rel="stylesheet" href="lib/bootstrap-3.2.0-dist/css/bootstrap.min.css">
 <script src="lib/jquery/jquery-1.11.1.js"></script>
 <script src="lib/bootstrap-3.2.0-dist/js/bootstrap.min.js"></script>
+<script src="lib/bootpag/jquery.bootpag.min.js"></script>
 <script src="lib/knockout/knockout-3.1.0.js"></script>
 <script src="lib/moment/moment.min.js"></script>
 </head>
@@ -34,6 +35,7 @@
             </tr>
             <!-- /ko -->
         </table>
+       <div id="page-selection">Pagination goes here</div>
         <button data-bind="click: beginAdd" class="btn">Add Account</button>
     </div>
 
@@ -66,7 +68,6 @@
                         </div>
                     </form>
                 </div>
-
                 <div class="modal-footer">
                     <button data-bind="click: addAccount" class="btn btn-primary">Add Account</button>
                     <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
@@ -164,6 +165,13 @@
         var addAccountViewModel = new AddAccountViewModel();
         ko.applyBindings(accountsViewModel, $('#main')[0]);
         ko.applyBindings(addAccountViewModel, $('#add')[0]);
+
+        // init bootpag
+        $('#page-selection').bootpag({
+            total: 5
+        }).on("page", function(event, /* page number here */ num){
+             //some ajax content loading...
+        });
 
     </script>
 </body>
