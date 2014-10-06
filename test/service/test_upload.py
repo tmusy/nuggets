@@ -14,9 +14,9 @@ def test_do_the_upload():
     pass
 
 
-def test_upload():
+def test_post_upload():
     with open('service/test.csv', 'rb') as testfile:
-        res = test_app.post('/upload', data= {'file': testfile})
+        res = test_app.post('/v1.0/import/transactions', data= {'file': testfile})
         assert res.status_code == 200
-        res = test_app.post('/upload', data= {'file': None})
+        res = test_app.post('/v1.0/import/transactions', data= {'file': None})
         assert res.status_code == 400
