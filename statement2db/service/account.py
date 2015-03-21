@@ -3,7 +3,6 @@ from flask import request
 from flask_restful import fields, Resource, marshal_with, abort, reqparse
 
 from statement2db.app import app, api
-from statement2db.database import db_session
 from statement2db.models import Account
 
 

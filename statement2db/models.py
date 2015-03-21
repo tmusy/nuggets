@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from sqlalchemy import Column, Integer, Unicode, DateTime, ForeignKey, Float
 
 from statement2db.extensions import db
