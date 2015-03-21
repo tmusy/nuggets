@@ -12,7 +12,7 @@ Base.query = db_session.query_property()
 
 
 def init_db():
-    import statement2db.model
+    import statement2db.models
     Base.metadata.create_all(bind=engine)
 
 

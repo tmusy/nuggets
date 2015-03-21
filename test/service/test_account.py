@@ -1,7 +1,7 @@
 import json
 from nose import with_setup
 from statement2db.database import init_db, clear_db, db_session
-from statement2db.model import Account
+from statement2db.models import Account
 from statement2db.service.account import app
 
 

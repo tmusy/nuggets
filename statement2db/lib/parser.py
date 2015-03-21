@@ -1,8 +1,9 @@
 import csv
 import dateutil.parser
 
-from statement2db.model import Transaction, Account
-from statement2db.database import db_session
+from statement2db.models import Transaction, Account
+from statement2db.extensions import db
+
 
 def parse_csv(file):
     """
@@ -22,33 +23,42 @@ def parse_csv(file):
 def extract_transactions(file):
     transactions = []
     rows = parse_csv(file)
-    bank = db_session.query(Account).filter_by(name='Bank').first()
+    bank = Account.query.filter_by(name='Bank').first()
     for row in rows:
         for col in row:
             try:
                 dt = dateutil.parser.parse(col)
                 date = dateutil.parser.parse(row[0])
                 text = row[1]
+                text = " ".join(text.split())
                 debit_amount = row[2]
                 credit_amount = row[3]
-                amount = 0
+                amount = 0.0
                 debit = None
                 credit = None
                 if debit_amount:
-                    amount = debit_amount
+                    amount = float(debit_amount)
                     debit = bank
                 elif credit_amount:
-                    amount = credit_amount
+                    amount = float(credit_amount)
                     credit = bank
-                valuta_date = row[4]
-                saldo = row[5]
+                valuta_date = dateutil.parser.parse(row[4])
+                saldo = None
+                if row[5]:
+                    saldo = float(row[5])
 
-                t = Transaction(amount,'CHF',date,text)
+                # create a Transaction object
+                t = Transaction(amount=amount,
+                                currency='CHF',
+                                date=date,
+                                description=text,
+                                valuta_date=valuta_date,
+                                reported_saldo=saldo)
                 t.debit = debit
                 t.credit = credit
                 transactions.append(t)
-                db_session.add(t)
-                db_session.commit()
+                db.session.add(t)
+                db.session.commit()
                 break
             except TypeError:
                 pass
