@@ -6,6 +6,8 @@ from werkzeug.exceptions import abort
 from werkzeug.utils import secure_filename
 
 from statement2db.app import app, api
+from statement2db.lib.parser import extract_transactions
+from statement2db.service.account import account_fields
 
 UPLOAD_FOLDER = '/tmp/uploads'
 ALLOWED_EXTENSIONS = set(['txt', 'csv'])
@@ -27,7 +29,7 @@ transaction_fields = {
 
 class ImportTransactionsResource(Resource):
 
-    @marshal_with(transaction_fields)
+    #tr@marshal_with(transaction_fields)
     def post(self):
         """
         :return: list of transaction as JSON: [{'id': '', 'name': '', 'description': ''}, ...]
@@ -36,23 +38,10 @@ class ImportTransactionsResource(Resource):
         f = flask.request.files['file']
         filename = do_the_upload(f)
         if filename:
+            transactions = extract_transactions(filename)
             return "Import successful"
         else:
             abort(400, message="Import was not successful")
-
-        account = db_session.query(Account).filter_by(id=int(id)).first()
-        if not account:
-            abort(404, message="Account doesn't exist")
-
-        args = self.reqparse.parse_args()
-        account_dict = {}
-        for k, v in args.iteritems():
-            if v is not None:
-                account_dict[k] = v
-                account.__setattr__(k, v)
-
-        db_session.commit()
-        return account, 201
 
 
 def do_the_upload(upload_file):
