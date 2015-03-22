@@ -2,8 +2,8 @@
 from flask import request
 from flask_restful import fields, Resource, marshal_with, abort, reqparse
 
-from statement2db.app import app, api
 from statement2db.models import Account
+from statement2db.extensions import db
 
 
 account_fields = {
@@ -31,7 +31,7 @@ class AccountResource(Resource):
         :return: account as JSON: {'id': str, 'name': str, 'description': str}
                  REST status ok code: 200
         """
-        account = db_session.query(Account).filter_by(id=int(id)).first()
+        account = Account.query.filter_by(id=int(id)).first()
         if not account:
             abort(404, message="Account {0} doesn't exist".format(id))
         return account
@@ -42,10 +42,10 @@ class AccountResource(Resource):
         :return: ''
                  REST status ok code: 204
         """
-        account = db_session.query(Account).filter_by(id=int(id)).first()
+        account = Account.query.filter_by(id=int(id)).first()
         if account:
-            db_session.delete(account)
-            db_session.commit()
+            db.session.delete(account)
+            db.session.commit()
         return '', 204
 
     @marshal_with(account_fields)
@@ -56,7 +56,7 @@ class AccountResource(Resource):
         :return: account as JSON: {'id': '', 'name': '', 'description': ''}
                  REST status ok code: 201
         """
-        account = db_session.query(Account).filter_by(id=int(id)).first()
+        account = Account.query.filter_by(id=int(id)).first()
         if not account:
             abort(404, message="Account doesn't exist")
 
@@ -67,7 +67,7 @@ class AccountResource(Resource):
                 account_dict[k] = v
                 account.__setattr__(k, v)
 
-        db_session.commit()
+        db.session.commit()
         return account, 201
 
 
@@ -90,7 +90,7 @@ class AccountListResource(Resource):
         index = request.args.get('index', 0)
         count = request.args.get('count', 5)
         order_by = request.args.get('order', 'name')
-        accounts = db_session.query(Account).order_by(order_by).offset(index).limit(count).all()
+        accounts = db.session.query(Account).order_by(order_by).offset(index).limit(count).all()
         #accounts = db_session.query(Account).all()
         if not accounts:
             abort(404, message="No Accounts available")
@@ -109,14 +109,6 @@ class AccountListResource(Resource):
             if v is not None:
                 account_dict[k] = v
         account = Account(**account_dict)
-        db_session.add(account)
-        db_session.commit()
+        db.session.add(account)
+        db.session.commit()
         return account, 201
-
-
-api.add_resource(AccountListResource, '/v1.0/accounts', endpoint='accounts')
-api.add_resource(AccountResource, '/v1.0/accounts/<string:id>', endpoint='account')
-
-
-if __name__ == '__main__':
-    app.run(debug=True)

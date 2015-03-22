@@ -22,7 +22,7 @@ def initdb():
     """Init/reset database."""
 
     db.session.remove()
-    db.drop_all()
+    db.drop_all(bind=None)
     db.create_all()
 
     bank = Account(name=u'Bank',

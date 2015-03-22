@@ -1,10 +1,13 @@
 import os
 
 from flask.app import Flask
-#from flask_restful import Api
+from flask_restful import Api
 
 from statement2db.config import DefaultConfig
 from statement2db.extensions import db
+from statement2db.api.account import AccountResource, AccountListResource
+from statement2db.api.transaction import TransactionResource, TransactionListResource
+from statement2db.api.upload import ImportTransactionsResource
 
 
 # For import *
@@ -30,6 +33,7 @@ def create_app(config=None, app_name=None, blueprints=None):
     configure_extensions(app)
     configure_logging(app)
     configure_routes(app)
+    configure_api(app)
     configure_error_handlers(app)
 
     return app
@@ -127,6 +131,20 @@ def configure_routes(app):
     @app.route('/')
     def root():
         return app.send_static_file('index.html')
+
+
+def configure_api(app):
+    """
+
+    :param app:
+    :return:
+    """
+    api = Api(app)
+    api.add_resource(AccountListResource, '/v1.0/accounts', endpoint='accounts')
+    api.add_resource(AccountResource, '/v1.0/accounts/<string:id>', endpoint='account')
+    api.add_resource(TransactionListResource, '/v1.0/transactions', endpoint='transactions')
+    api.add_resource(TransactionResource, '/v1.0/transactions/<string:id>', endpoint='transaction')
+    api.add_resource(ImportTransactionsResource, '/v1.0/import/transactions', endpoint='import')
 
 
 def configure_error_handlers(app):

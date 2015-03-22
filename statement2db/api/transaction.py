@@ -3,17 +3,15 @@ import dateutil.parser
 from flask import request
 from flask_restful import fields, Resource, marshal_with, abort, reqparse
 
-from statement2db.app import app, api
-from statement2db.database import db_session
 from statement2db.models import Transaction, Account
-from statement2db.service.account import account_fields
-import statement2db.service.account
+from statement2db.api.account import account_fields
+from statement2db.extensions import db
 
 
 transaction_fields = {
     'uri': fields.Url('transaction'),
     'id': fields.Integer,
-    'amount': fields.Float,
+    'amount': fields.Price(decimals=2),
     'currency': fields.String,
     'date': fields.DateTime,
     'name': fields.String,
@@ -42,7 +40,7 @@ class TransactionResource(Resource):
         'name': '', 'description': ''}
                  REST status ok code: 200
         """
-        transaction = db_session.query(Transaction).filter_by(id=int(id)).first()
+        transaction = Transaction.query.filter_by(id=int(id)).first()
         if not transaction:
             abort(404, message="Transaction {0} doesn't exist".format(id))
         return transaction
@@ -53,10 +51,10 @@ class TransactionResource(Resource):
         :return: ''
                  REST status ok code: 204
         """
-        transaction = db_session.query(Transaction).filter_by(id=int(id)).first()
+        transaction = Transaction.query.filter_by(id=int(id)).first()
         if transaction:
-            db_session.delete(transaction)
-            db_session.commit()
+            db.session.delete(transaction)
+            db.session.commit()
         return '', 204
 
     @marshal_with(transaction_fields)
@@ -67,7 +65,7 @@ class TransactionResource(Resource):
         :return: transaction as JSON: {'id': '', 'amount': 0, 'currency': '', 'name': '', 'description': ''}
                  REST status ok code: 201
         """
-        transaction = db_session.query(Transaction).filter_by(id=int(id)).first()
+        transaction = Transaction.query.filter_by(id=int(id)).first()
         if not transaction:
             abort(404, message="Transaction doesn't exist")
 
@@ -80,7 +78,7 @@ class TransactionResource(Resource):
                 transaction_dict[k] = v
                 transaction.__setattr__(k, v)
 
-        db_session.commit()
+        db.session.commit()
         return transaction, 201
 
 
@@ -88,8 +86,7 @@ class TransactionListResource(Resource):
 
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
-        self.reqparse.add_argument('amount', type=float, required=True,
-            help = 'No amount provided', location='json')
+        self.reqparse.add_argument('amount', type=float, required=True, location='json')
         self.reqparse.add_argument('currency', type=unicode, location='json')
         self.reqparse.add_argument('date', type=unicode, location='json')
         self.reqparse.add_argument('name', type=unicode, location='json')
@@ -105,7 +102,7 @@ class TransactionListResource(Resource):
         'date': datetime, 'name': '', 'description': ''},...]
                  REST status code: 200
         """
-        transactions = db_session.query(Transaction).all()
+        transactions = Transaction.query.all()
         if not transactions:
             abort(404, message="No Transactions available")
         return transactions, 200
@@ -136,19 +133,11 @@ class TransactionListResource(Resource):
         transaction = Transaction(**transaction_dict)
 
         if debit:
-            account = db_session.query(Account).filter_by(name=debit['name']).first()
+            account = Account.query.filter_by(name=debit['name']).first()
             transaction.debit = account
         if credit:
-            account = db_session.query_property(Account).filter_by(name=credit['name']).first()
+            account = Account.query.filter_by(name=credit['name']).first()
             transaction.credit = account
-        db_session.add(transaction)
-        db_session.commit()
+        db.session.add(transaction)
+        db.session.commit()
         return transaction, 201
-
-
-api.add_resource(TransactionListResource, '/v1.0/transactions', endpoint='transactions')
-api.add_resource(TransactionResource, '/v1.0/transactions/<string:id>', endpoint='transaction')
-
-
-if __name__ == '__main__':
-    app.run(debug=True)

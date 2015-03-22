@@ -66,3 +66,6 @@ class TestConfig(BaseConfig):
 
     SQLALCHEMY_ECHO = False
     SQLALCHEMY_DATABASE_URI = 'sqlite://'
+
+    UPLOAD_FOLDER = os.path.join('/tmp', 'uploads')
+    make_dir(UPLOAD_FOLDER)
