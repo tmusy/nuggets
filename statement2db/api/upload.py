@@ -41,8 +41,6 @@ class ImportTransactionsResource(Resource):
     def _save_file(self, upload_file):
         if upload_file and allowed_file(upload_file.filename):
             filename = secure_filename(upload_file.filename)
-            # if not os.path.exists(UPLOAD_FOLDER):
-            #     os.makedirs(UPLOAD_FOLDER)
             full_filename = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
             upload_file.save(full_filename)
         return full_filename

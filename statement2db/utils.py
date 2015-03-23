@@ -71,7 +71,7 @@ def make_dir(dir_path):
         raise e
 
 
-def unicode_csv_reader(utf8_data, delimiter=';', **kwargs):
+def unicode_csv_reader(utf8_data, delimiter=',', **kwargs):
     csv_reader = csv.reader(utf8_data, delimiter=delimiter, **kwargs)
     for row in csv_reader:
         yield [unicode(cell, 'utf-8') for cell in row]

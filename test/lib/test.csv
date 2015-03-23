@@ -1,5 +1,5 @@
 Buchungsdatum,Text,Belastung,Gutschrift,Valutadatum,Saldo
-31.12.2013,"Einzug LSV                                     ,SUNRISE COMMUNICATIONS AG SUNRISE              ",24.15,,31.12.2013,505.71
-31.12.2013,"Maestro-Zahlung CHF                            ,02888652-0 COOP-1906 ZH HONGG                  ",83.55,,31.12.2013,
-31.12.2013,"Saldo der Abschlussbuchungen                   ,gemass separater Anzeige                       ",,12.08,31.12.2013,
-30.12.2013,"Maestro-Zahlung CHF                            ,02888652-0 MIGROS M HONGG                      ",31.65,,30.12.2013,601.33
+31.12.2013,"Einzug LSV                                     ,SUNRISE COMMUNICATIONS AG SUNRISE              ",24.15,,31.12.2013,505.71,,Kommunikation
+31.12.2013,"Maestro-Zahlung CHF                            ,02888652-0 COOP-1906 ZH HONGG                  ",83.55,,31.12.2013,,,
+31.12.2013,"Saldo der Abschlussbuchungen                   ,gemass separater Anzeige                       ",,12.08,31.12.2013,,,
+30.12.2013,"Maestro-Zahlung CHF                            ,02888652-0 MIGROS M HONGG                      ",31.65,,30.12.2013,601.33,,,

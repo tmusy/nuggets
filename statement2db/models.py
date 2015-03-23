@@ -8,7 +8,7 @@ class Transaction(db.Model):
     amount = Column(db.Float)
     currency = Column(db.Unicode(4))
     date = Column(db.DateTime)
-    name = Column(db.Unicode(240), unique=True)
+    name = Column(db.Unicode(240))
     description = Column(db.Unicode(1024))
     debit_id = Column(db.Integer, db.ForeignKey('account.id'))
     credit_id = Column(db.Integer, db.ForeignKey('account.id'))
