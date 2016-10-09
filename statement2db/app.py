@@ -26,7 +26,7 @@ def create_app(config=None, app_name=None, blueprints=None):
     if blueprints is None:
         blueprints = DEFAULT_BLUEPRINTS
 
-    app = Flask(app_name, instance_path=DefaultConfig.INSTANCE_FOLDER_PATH, instance_relative_config=True)
+    app = Flask(app_name, static_url_path='', instance_path=DefaultConfig.INSTANCE_FOLDER_PATH, instance_relative_config=True)
     configure_app(app, config)
     configure_hook(app)
     configure_blueprints(app, blueprints)
@@ -139,7 +139,7 @@ def configure_api(app):
     :param app:
     :return:
     """
-    api = Api(app)
+    api = Api(app, prefix='/api')
     api.add_resource(AccountListResource, '/v1.0/accounts', endpoint='accounts')
     api.add_resource(AccountResource, '/v1.0/accounts/<string:id>', endpoint='account')
     api.add_resource(TransactionListResource, '/v1.0/transactions', endpoint='transactions')

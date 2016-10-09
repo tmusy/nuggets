@@ -4,7 +4,7 @@ from flask import request, current_app
 from flask_restful import fields, Resource, marshal_with, abort, reqparse
 from werkzeug.utils import secure_filename
 
-from statement2db.lib.parser import extract_transactions
+from statement2db.lib.parser import extract_transactions, extract_transactions_cs
 from statement2db.api.account import account_fields
 from statement2db.utils import allowed_file
 
@@ -33,7 +33,7 @@ class ImportTransactionsResource(Resource):
         f = request.files['file']
         filename = self._save_file(f)
         if filename:
-            transactions = extract_transactions(filename)
+            transactions = extract_transactions_cs(filename)
             return "Import successful"
         else:
             abort(400, message="Import was not successful")

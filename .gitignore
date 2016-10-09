@@ -17,3 +17,9 @@ docs/_build
 
 # Project Files
 .idea
+
+# Flask instance files
+instance/*
+
+# Javascript libs
+statement2db/static/lib/*

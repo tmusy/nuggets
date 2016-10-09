@@ -3,9 +3,9 @@
 <head>
 <title>S2D</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="lib/bootstrap-3.2.0-dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css">
 <script src="lib/jquery/jquery-1.11.1.js"></script>
-<script src="lib/bootstrap-3.2.0-dist/js/bootstrap.min.js"></script>
+<script src="lib/bootstrap/js/bootstrap.min.js"></script>
 <script src="lib/bootpag/jquery.bootpag.min.js"></script>
 <script src="lib/knockout/knockout-3.1.0.js"></script>
 <script src="lib/moment/moment.min.js"></script>
@@ -16,6 +16,7 @@
             <a class="brand" href="index.html">S2D</a>
             <a href="transaction.html">Transactions</a>
             <a href="account.html">Accounts</a>
+            <a href="chart.html">Charts</a>
         </div>
     </div>
     <div id="main" class="container">
@@ -79,7 +80,7 @@
 
         function AccountsViewModel() {
             var self = this;
-            self.accountsURI = 'http://127.0.0.1:5000/v1.0/accounts';
+            self.accountsURI = 'http://127.0.0.1:5000/api/v1.0/accounts';
             self.accounts = ko.observableArray();
 
             /* helper that wraps the jquery $.ajax() call */

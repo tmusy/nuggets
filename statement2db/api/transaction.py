@@ -102,10 +102,11 @@ class TransactionListResource(Resource):
         'date': datetime, 'name': '', 'description': ''},...]
                  REST status code: 200
         """
-        transactions = Transaction.query.all()
+        #transactions = Transaction.query.paginate(page=None, per_page=1000, error_out=True)
+        transactions = Transaction.query.order_by('date').all()
         if not transactions:
             abort(404, message="No Transactions available")
-        return transactions, 200
+        return transactions, 200  # create pagination, now its just delivering 20 items
 
     @marshal_with(transaction_fields)
     def post(self):
