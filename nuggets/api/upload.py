@@ -4,9 +4,9 @@ from flask import request, current_app
 from flask_restful import fields, Resource, marshal_with, abort, reqparse
 from werkzeug.utils import secure_filename
 
-from statement2db.lib.parser import extract_transactions, extract_transactions_cs
-from statement2db.api.account import account_fields
-from statement2db.utils import allowed_file
+from nuggets.lib.parser import extract_transactions, extract_transactions_cs
+from nuggets.api.account import account_fields
+from nuggets.utils import allowed_file
 
 
 transaction_fields = {

@@ -3,11 +3,11 @@ import os
 from flask.app import Flask
 from flask_restful import Api
 
-from statement2db.config import DefaultConfig
-from statement2db.extensions import db
-from statement2db.api.account import AccountResource, AccountListResource
-from statement2db.api.transaction import TransactionResource, TransactionListResource
-from statement2db.api.upload import ImportTransactionsResource
+from nuggets.config import DefaultConfig
+from nuggets.extensions import db
+from nuggets.api.account import AccountResource, AccountListResource
+from nuggets.api.transaction import TransactionResource, TransactionListResource
+from nuggets.api.upload import ImportTransactionsResource
 
 
 # For import *

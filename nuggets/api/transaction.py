@@ -3,9 +3,9 @@ import dateutil.parser
 from flask import request
 from flask_restful import fields, Resource, marshal_with, abort, reqparse
 
-from statement2db.models import Transaction, Account
-from statement2db.api.account import account_fields
-from statement2db.extensions import db
+from nuggets.models import Transaction, Account
+from nuggets.api.account import account_fields
+from nuggets.extensions import db
 
 
 transaction_fields = {

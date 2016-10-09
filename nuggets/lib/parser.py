@@ -2,9 +2,9 @@ import csv
 import dateutil
 import datetime
 
-from statement2db.models import Transaction, Account
-from statement2db.extensions import db
-from statement2db.utils import unicode_csv_reader
+from nuggets.models import Transaction, Account
+from nuggets.extensions import db
+from nuggets.utils import unicode_csv_reader
 
 
 def parse_csv(file):

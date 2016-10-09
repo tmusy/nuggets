@@ -2,8 +2,8 @@ import json
 
 from test import BaseTestCase
 
-from statement2db.models import Transaction
-from statement2db.extensions import db
+from nuggets.models import Transaction
+from nuggets.extensions import db
 
 
 class TestAccount(BaseTestCase):

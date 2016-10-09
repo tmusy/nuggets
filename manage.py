@@ -2,9 +2,9 @@
 
 from flask_script import Manager
 
-from statement2db import create_app
-from statement2db.extensions import db
-from statement2db.models import Account
+from nuggets import create_app
+from nuggets.extensions import db
+from nuggets.models import Account
 
 app = create_app()
 manager = Manager(app)

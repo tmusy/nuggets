@@ -2,8 +2,8 @@
 from flask import request
 from flask_restful import fields, Resource, marshal_with, abort, reqparse
 
-from statement2db.models import Account
-from statement2db.extensions import db
+from nuggets.models import Account
+from nuggets.extensions import db
 
 
 account_fields = {

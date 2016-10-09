@@ -7,10 +7,10 @@
 """
 from flask_testing import TestCase as Base
 
-from statement2db import create_app
-from statement2db.config import TestConfig
-from statement2db.extensions import db
-from statement2db.models import Account
+from nuggets import create_app
+from nuggets.config import TestConfig
+from nuggets.extensions import db
+from nuggets.models import Account
 
 
 class BaseTestCase(Base):

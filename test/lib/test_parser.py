@@ -1,6 +1,6 @@
 from test import BaseTestCase
 
-from statement2db.lib.parser import parse_csv, extract_transactions, extract_transactions_cs
+from nuggets.lib.parser import parse_csv, extract_transactions, extract_transactions_cs
 
 
 class TestParser(BaseTestCase):

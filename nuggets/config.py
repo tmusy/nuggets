@@ -6,7 +6,7 @@ from utils import make_dir
 
 class BaseConfig(object):
 
-    PROJECT = "statement2db"
+    PROJECT = "nuggets"
 
     # Get app root path, also can use flask.root_path.
     # ../../config.py
@@ -42,7 +42,7 @@ class DefaultConfig(BaseConfig):
     # SQLITE for prototyping.
     #SQLALCHEMY_DATABASE_URI = 'sqlite:///' + BaseConfig.INSTANCE_FOLDER_PATH + '/db.sqlite'
     # MYSQL for production.
-    SQLALCHEMY_DATABASE_URI = 'mysql://state_man:2db-stM14@127.0.0.1/statement2db?charset=utf8'
+    SQLALCHEMY_DATABASE_URI = 'mysql://state_man:2db-stM14@127.0.0.1/nuggets?charset=utf8'
 
     # Flask-cache: http://pythonhosted.org/Flask-Cache/
     #CACHE_TYPE = 'simple'

@@ -1,6 +1,6 @@
-# statement2db
+# nuggets
 
-statement2db is Flask application that reads bank statements in a csv format and returns
+nuggets is Flask application that reads bank statements in a csv format and returns
 a JSON object with the extracted information.
 
 ## Development Environment
