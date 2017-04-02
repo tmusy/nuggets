@@ -1,0 +1,28 @@
+version: '2'
+
+services:
+  postgres:
+    build: ./postgres
+    image: postgres:9.5
+    command: postgres -c config_file=/etc/postgres/postgresql.conf
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+    ports:
+        - 5432:5432
+
+  website:
+    build: .
+    command: >
+      gunicorn -b 0.0.0.0:8000
+        --access-logfile -
+        --reload
+        "nuggets.app:create_app()"
+    environment:
+      PYTHONUNBUFFERED: 'true'
+    volumes:
+      - '.:/nuggets'
+    ports:
+      - '8000:8000'
+
+volumes:
+    dbdata:
