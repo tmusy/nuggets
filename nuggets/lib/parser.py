@@ -2,7 +2,7 @@ import csv
 import dateutil
 import datetime
 
-from nuggets.models import Transaction, Account
+from nuggets.models import Trx, Account
 from nuggets.extensions import db
 from nuggets.utils import unicode_csv_reader
 
@@ -56,18 +56,18 @@ def extract_transactions(file):
                 category = None
 
                 # check if exists
-                t = Transaction.query.filter_by(description=text, date=date)\
-                    .filter(Transaction.amount <= int(amount)+1, Transaction.amount >= int(amount)).first()
+                t = Trx.query.filter_by(description=text, date=date)\
+                    .filter(Trx.amount <= int(amount) + 1, Trx.amount >= int(amount)).first()
                 if not t:
                     # create a Transaction object
-                    t = Transaction(amount=amount,
-                                    currency='CHF',
-                                    date=date,
-                                    name=name,
-                                    description=text,
-                                    valuta_date=valuta_date,
-                                    reported_saldo=saldo,
-                                    category=category)
+                    t = Trx(amount=amount,
+                            currency='CHF',
+                            date=date,
+                            name=name,
+                            description=text,
+                            valuta_date=valuta_date,
+                            reported_saldo=saldo,
+                            category=category)
                     t.debit = debit
                     t.credit = credit
                     transactions.append(t)
@@ -116,17 +116,17 @@ def extract_transactions_cs(file):
                 saldo = float(row[5])
 
             # check if exists
-            t = Transaction.query.filter_by(name=name, description=text, date=date)\
-                .filter(Transaction.amount <= int(amount)+1, Transaction.amount >= int(amount)).first()
+            t = Trx.query.filter_by(name=name, description=text, date=date)\
+                .filter(Trx.amount <= int(amount) + 1, Trx.amount >= int(amount)).first()
             if not t:
                 # create a Transaction object
-                t = Transaction(amount=amount,
-                                currency='CHF',
-                                date=date,
-                                name=name,
-                                description=text,
-                                valuta_date=valuta_date,
-                                reported_saldo=saldo)
+                t = Trx(amount=amount,
+                        currency='CHF',
+                        date=date,
+                        name=name,
+                        description=text,
+                        valuta_date=valuta_date,
+                        reported_saldo=saldo)
                 t.debit = debit
                 t.credit = credit
                 transactions.append(t)

@@ -1,6 +1,6 @@
 #!flask/bin/python
-from flask import request
-from flask_restful import fields, Resource, marshal_with, abort, reqparse
+from flask import request, url_for
+from flask_restful import fields, Resource, marshal_with, abort, reqparse, marshal
 
 from nuggets.models import Account
 from nuggets.extensions import db
@@ -8,7 +8,7 @@ from nuggets.extensions import db
 
 account_fields = {
     'uri': fields.Url('account'),
-    'id': fields.Integer,
+    'nr': fields.Integer,
     'name': fields.String,
     'type': fields.String,
     'description': fields.String
@@ -75,26 +75,43 @@ class AccountListResource(Resource):
 
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
+        self.reqparse.add_argument('nr', type=unicode, required=True, location='json')
         self.reqparse.add_argument('name', type=unicode, required=True, location='json')
         self.reqparse.add_argument('type', type=unicode, location='json')
         self.reqparse.add_argument('description', type=unicode, location='json')
         super(AccountListResource, self).__init__()
 
-    @marshal_with(account_fields)
+#    @marshal_with(account_fields)
     def get(self):
         """
         :param
         :return: accounts as JSON: [{'id': '', 'name': '', 'description': ''},...]
                  REST status code: 200
         """
-        index = request.args.get('index', 0)
-        count = request.args.get('count', 5)
-        order_by = request.args.get('order', 'name')
-        accounts = db.session.query(Account).order_by(order_by).offset(index).limit(count).all()
-        #accounts = db_session.query(Account).all()
+        args = request.args
+        page_num = int(args.get('page'))
+        page_size = int(args.get('pageSize'))
+        res = Account.query.order_by(Account.id).paginate(page=page_num, per_page=page_size, error_out=True)
+        accounts = res.items
+        res_dict = {
+            '_links': {
+                'self': {'href': self.get_url() + '?page={}'.format(res.page)},
+                'first': {'href': self.get_url()},
+                'prev': {'href': self.get_url() + '?page={}'.format(res.prev_num)},
+                'next': {'href': self.get_url() + '?page={}'.format(res.next_num)},
+                'last': {'href': self.get_url() + '?page={}'.format(res.pages)}
+            },
+            '_embedded': {
+                'items': marshal(accounts, account_fields),
+            },
+            'total': res.total,
+            'count': res.per_page,
+            'page_count': res.pages
+        }
+
         if not accounts:
             abort(404, message="No Accounts available")
-        return accounts, 200
+        return res_dict, 200
 
     @marshal_with(account_fields)
     def post(self):
@@ -112,3 +129,52 @@ class AccountListResource(Resource):
         db.session.add(account)
         db.session.commit()
         return account, 201
+
+    def get_url(self):
+        return request.url_root[:-1] + url_for('accounts')
+
+
+class AccountTransactionListResource(Resource):
+
+    def __init__(self):
+        self.reqparse = reqparse.RequestParser()
+        self.reqparse.add_argument('nr', type=unicode, required=True, location='json')
+        self.reqparse.add_argument('name', type=unicode, required=True, location='json')
+        self.reqparse.add_argument('type', type=unicode, location='json')
+        self.reqparse.add_argument('description', type=unicode, location='json')
+        super(AccountListResource, self).__init__()
+
+    #    @marshal_with(account_fields)
+    def get(self):
+        """
+        :param
+        :return: transactions as JSON: [{'id': '', 'amount': 0, 'currency': '',
+        'date': datetime, 'name': '', 'description': ''},...]
+                 REST status code: 200
+        """
+        # args = request.args
+        # page_num = int(args.get('page'))
+        # page_size = int(args.get('pageSize'))
+        # res = Trx.query.order_by(desc(Trx.id)).paginate(page=page_num, per_page=page_size, error_out=True)
+        # transactions = res.items
+        # res_dict = {
+        #     '_links': {
+        #         'self': {'href': self.get_url()+'?page={}'.format(res.page)},
+        #         'first': {'href': self.get_url()},
+        #         'prev': {'href': self.get_url()+'?page={}'.format(res.prev_num)},
+        #         'next': {'href': self.get_url()+'?page={}'.format(res.next_num)},
+        #         'last': {'href': self.get_url()+'?page={}'.format(res.pages)}
+        #     },
+        #     '_embedded': {
+        #         'items': marshal(transactions, transaction_fields),
+        #     },
+        #     'total': res.total,
+        #     'count': res.per_page,
+        #     'page_count': res.pages
+        # }
+        #
+        # #transactions = Trx.query.order_by('date').all()
+        # if not transactions:
+        #     abort(404, message="No Transactions available")
+        #
+        # return res_dict, 200  # create pagination, now its just delivering 20 items

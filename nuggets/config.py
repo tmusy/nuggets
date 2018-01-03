@@ -42,7 +42,9 @@ class DefaultConfig(BaseConfig):
     # SQLITE for prototyping.
     #SQLALCHEMY_DATABASE_URI = 'sqlite:///' + BaseConfig.INSTANCE_FOLDER_PATH + '/db.sqlite'
     # MYSQL for production.
-    SQLALCHEMY_DATABASE_URI = 'mysql://state_man:2db-stM14@127.0.0.1/nuggets?charset=utf8'
+    # SQLALCHEMY_DATABASE_URI = 'mysql://state_man:2db-stM14@127.0.0.1/nuggets?charset=utf8'
+    # postgresql for production.
+    SQLALCHEMY_DATABASE_URI = 'postgresql://nuggets:nuggets@localhost/nuggets'
 
     # Flask-cache: http://pythonhosted.org/Flask-Cache/
     #CACHE_TYPE = 'simple'

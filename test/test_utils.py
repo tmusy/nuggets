@@ -2,6 +2,7 @@ __author__ = 'thierry'
 
 from nuggets.utils import allowed_file
 
+
 def test_allowed_file():
     assert(allowed_file("test.txt"))
     assert(allowed_file("test.csv"))

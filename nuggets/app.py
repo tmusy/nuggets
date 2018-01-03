@@ -1,11 +1,12 @@
 import os
 
 from flask.app import Flask
+from flask_cors import CORS
 from flask_restful import Api
 
 from nuggets.config import DefaultConfig
 from nuggets.extensions import db
-from nuggets.api.account import AccountResource, AccountListResource
+from nuggets.api.account import AccountResource, AccountListResource, AccountTransactionListResource
 from nuggets.api.transaction import TransactionResource, TransactionListResource
 from nuggets.api.upload import ImportTransactionsResource
 
@@ -27,6 +28,9 @@ def create_app(config=None, app_name=None, blueprints=None):
         blueprints = DEFAULT_BLUEPRINTS
 
     app = Flask(app_name, static_url_path='', instance_path=DefaultConfig.INSTANCE_FOLDER_PATH, instance_relative_config=True)
+    cors = CORS(app)
+    app.config['CORS_HEADERS'] = 'Content-Type'
+
     configure_app(app, config)
     configure_hook(app)
     configure_blueprints(app, blueprints)
@@ -142,6 +146,7 @@ def configure_api(app):
     api = Api(app, prefix='/api')
     api.add_resource(AccountListResource, '/v1.0/accounts', endpoint='accounts')
     api.add_resource(AccountResource, '/v1.0/accounts/<string:id>', endpoint='account')
+    api.add_resource(AccountTransactionListResource, '/v1.0/accounts/<string:id>/transactions', endpoint='account_transactions')
     api.add_resource(TransactionListResource, '/v1.0/transactions', endpoint='transactions')
     api.add_resource(TransactionResource, '/v1.0/transactions/<string:id>', endpoint='transaction')
     api.add_resource(ImportTransactionsResource, '/v1.0/import/transactions', endpoint='import')

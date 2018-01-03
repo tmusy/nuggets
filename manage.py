@@ -5,6 +5,7 @@ from flask_script import Manager
 from nuggets import create_app
 from nuggets.extensions import db
 from nuggets.models import Account
+from nuggets.services import calculate_all_saldos
 
 app = create_app()
 manager = Manager(app)
@@ -15,6 +16,7 @@ def run():
     """Run in local machine."""
 
     app.run()
+#    calculate_all_saldos()
 
 
 @manager.command

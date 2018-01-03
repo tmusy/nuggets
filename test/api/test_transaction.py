@@ -2,7 +2,7 @@ import json
 
 from test import BaseTestCase
 
-from nuggets.models import Transaction
+from nuggets.models import Trx
 from nuggets.extensions import db
 
 
@@ -36,8 +36,8 @@ class TestAccount(BaseTestCase):
         res = self.client.post('/v1.0/transactions', data=json.dumps(new_transaction), content_type='application/json')
         assert res.status_code == 201
     
-        our_transaction = Transaction.query.filter_by(name='test_transaction_1',
-                                                      description='test description').first()
+        our_transaction = Trx.query.filter_by(name='test_transaction_1',
+                                              description='test description').first()
         assert our_transaction
 
     def test_edit_exercise(self):
@@ -49,9 +49,9 @@ class TestAccount(BaseTestCase):
                               data=json.dumps(edited_transaction),
                               content_type='application/json')
         assert res.status_code == 201
-        our_transaction = Transaction.query.filter_by(amount=10,
-                                                      name='test_transaction_2',
-                                                      description='desc').first()
+        our_transaction = Trx.query.filter_by(amount=10,
+                                              name='test_transaction_2',
+                                              description='desc').first()
         assert our_transaction
     
         edited_transaction = {'amount': 33, 'name': 'test_transaction_1', 'description': ''}
@@ -59,9 +59,9 @@ class TestAccount(BaseTestCase):
                               data=json.dumps(edited_transaction),
                               content_type='application/json')
         assert res.status_code == 201
-        our_transaction = Transaction.query.filter_by(amount=33,
-                                                      name='test_transaction_1',
-                                                      description='').first()
+        our_transaction = Trx.query.filter_by(amount=33,
+                                              name='test_transaction_1',
+                                              description='').first()
         assert our_transaction
 
     def test_get_exercise_list(self):
@@ -77,7 +77,7 @@ class TestAccount(BaseTestCase):
 
 
 def _create_test_transaction(id):
-    t = Transaction(amount=10, name='test_transaction_'+str(id))
+    t = Trx(amount=10, name='test_transaction_' + str(id))
     db.session.add(t)
     db.session.commit()
     return t

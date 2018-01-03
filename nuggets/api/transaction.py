@@ -1,9 +1,10 @@
 #!flask/bin/python
 import dateutil.parser
 from flask import request
-from flask_restful import fields, Resource, marshal_with, abort, reqparse
+from flask_restful import fields, Resource, marshal_with, abort, reqparse, marshal, url_for
+from sqlalchemy import desc
 
-from nuggets.models import Transaction, Account
+from nuggets.models import Trx, Account
 from nuggets.api.account import account_fields
 from nuggets.extensions import db
 
@@ -13,6 +14,7 @@ transaction_fields = {
     'id': fields.Integer,
     'amount': fields.Price(decimals=2),
     'currency': fields.String,
+    'saldo': fields.Price(decimals=2),
     'date': fields.DateTime,
     'name': fields.String,
     'description': fields.String,
@@ -40,7 +42,7 @@ class TransactionResource(Resource):
         'name': '', 'description': ''}
                  REST status ok code: 200
         """
-        transaction = Transaction.query.filter_by(id=int(id)).first()
+        transaction = Trx.query.filter_by(id=int(id)).first()
         if not transaction:
             abort(404, message="Transaction {0} doesn't exist".format(id))
         return transaction
@@ -51,7 +53,7 @@ class TransactionResource(Resource):
         :return: ''
                  REST status ok code: 204
         """
-        transaction = Transaction.query.filter_by(id=int(id)).first()
+        transaction = Trx.query.filter_by(id=int(id)).first()
         if transaction:
             db.session.delete(transaction)
             db.session.commit()
@@ -65,7 +67,7 @@ class TransactionResource(Resource):
         :return: transaction as JSON: {'id': '', 'amount': 0, 'currency': '', 'name': '', 'description': ''}
                  REST status ok code: 201
         """
-        transaction = Transaction.query.filter_by(id=int(id)).first()
+        transaction = Trx.query.filter_by(id=int(id)).first()
         if not transaction:
             abort(404, message="Transaction doesn't exist")
 
@@ -92,9 +94,13 @@ class TransactionListResource(Resource):
         self.reqparse.add_argument('name', type=unicode, location='json')
         self.reqparse.add_argument('description', type=unicode, location='json')
         self.reqparse.add_argument('debit', type=dict, location='json')
+
+        self.p_reqparse = reqparse.RequestParser()
+        self.p_reqparse.add_argument('page', type=unicode, location='path')
+
         super(TransactionListResource, self).__init__()
 
-    @marshal_with(transaction_fields)
+    #@marshal_with(transaction_fields)
     def get(self):
         """
         :param
@@ -102,11 +108,32 @@ class TransactionListResource(Resource):
         'date': datetime, 'name': '', 'description': ''},...]
                  REST status code: 200
         """
-        #transactions = Transaction.query.paginate(page=None, per_page=1000, error_out=True)
-        transactions = Transaction.query.order_by('date').all()
+        args = request.args
+        page_num = int(args.get('page'))
+        page_size = int(args.get('pageSize'))
+        res = Trx.query.order_by(desc(Trx.id)).paginate(page=page_num, per_page=page_size, error_out=True)
+        transactions = res.items
+        res_dict = {
+            '_links': {
+                'self': {'href': self.get_url()+'?page={}'.format(res.page)},
+                'first': {'href': self.get_url()},
+                'prev': {'href': self.get_url()+'?page={}'.format(res.prev_num)},
+                'next': {'href': self.get_url()+'?page={}'.format(res.next_num)},
+                'last': {'href': self.get_url()+'?page={}'.format(res.pages)}
+            },
+            '_embedded': {
+                'items': marshal(transactions, transaction_fields),
+            },
+            'total': res.total,
+            'count': res.per_page,
+            'page_count': res.pages
+        }
+
+        #transactions = Trx.query.order_by('date').all()
         if not transactions:
             abort(404, message="No Transactions available")
-        return transactions, 200  # create pagination, now its just delivering 20 items
+
+        return res_dict, 200  # create pagination, now its just delivering 20 items
 
     @marshal_with(transaction_fields)
     def post(self):
@@ -131,7 +158,7 @@ class TransactionListResource(Resource):
         if 'credit' in transaction_dict:
             credit = transaction_dict.pop('credit')
 
-        transaction = Transaction(**transaction_dict)
+        transaction = Trx(**transaction_dict)
 
         if debit:
             account = Account.query.filter_by(name=debit['name']).first()
@@ -142,3 +169,6 @@ class TransactionListResource(Resource):
         db.session.add(transaction)
         db.session.commit()
         return transaction, 201
+
+    def get_url(self):
+        return request.url_root[:-1] + url_for('transactions')
