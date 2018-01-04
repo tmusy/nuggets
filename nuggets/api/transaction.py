@@ -1,12 +1,13 @@
 #!flask/bin/python
 import dateutil.parser
 from flask import request
-from flask_restful import fields, Resource, marshal_with, abort, reqparse, marshal, url_for
+from flask_restful import fields, Resource, marshal_with, abort, reqparse, url_for
 from sqlalchemy import desc
 
-from nuggets.models import Trx, Account
-from nuggets.api.account import account_fields
+from nuggets.decorators import paginate, marshal
 from nuggets.extensions import db
+from nuggets.models import Trx, Account
+from nuggets.schemas import TrxSchema
 
 
 transaction_fields = {
@@ -17,9 +18,7 @@ transaction_fields = {
     'saldo': fields.Price(decimals=2),
     'date': fields.DateTime,
     'name': fields.String,
-    'description': fields.String,
-    'credit': fields.List(fields.Nested(account_fields)),
-    'debit': fields.List(fields.Nested(account_fields))
+    'description': fields.String
 }
 
 
@@ -100,7 +99,8 @@ class TransactionListResource(Resource):
 
         super(TransactionListResource, self).__init__()
 
-    #@marshal_with(transaction_fields)
+    @marshal(TrxSchema(many=True))
+    @paginate('transactions')
     def get(self):
         """
         :param
@@ -108,32 +108,7 @@ class TransactionListResource(Resource):
         'date': datetime, 'name': '', 'description': ''},...]
                  REST status code: 200
         """
-        args = request.args
-        page_num = int(args.get('page'))
-        page_size = int(args.get('pageSize'))
-        res = Trx.query.order_by(desc(Trx.id)).paginate(page=page_num, per_page=page_size, error_out=True)
-        transactions = res.items
-        res_dict = {
-            '_links': {
-                'self': {'href': self.get_url()+'?page={}'.format(res.page)},
-                'first': {'href': self.get_url()},
-                'prev': {'href': self.get_url()+'?page={}'.format(res.prev_num)},
-                'next': {'href': self.get_url()+'?page={}'.format(res.next_num)},
-                'last': {'href': self.get_url()+'?page={}'.format(res.pages)}
-            },
-            '_embedded': {
-                'items': marshal(transactions, transaction_fields),
-            },
-            'total': res.total,
-            'count': res.per_page,
-            'page_count': res.pages
-        }
-
-        #transactions = Trx.query.order_by('date').all()
-        if not transactions:
-            abort(404, message="No Transactions available")
-
-        return res_dict, 200  # create pagination, now its just delivering 20 items
+        return Trx.query.order_by(desc(Trx.id))
 
     @marshal_with(transaction_fields)
     def post(self):

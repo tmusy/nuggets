@@ -1,6 +1,6 @@
 #!flask/bin/python
 from flask import request, url_for
-from flask_restful import fields, Resource, marshal_with, abort, reqparse
+from flask_restful import Resource, abort
 from sqlalchemy import desc
 
 from nuggets.models import Account, Trx
@@ -9,25 +9,10 @@ from nuggets.schemas import AccountSchema, TrxSchema
 from nuggets.decorators import paginate, marshal
 
 
-account_fields = {
-    'uri': fields.Url('account'),
-    'nr': fields.Integer,
-    'name': fields.String,
-    'type': fields.String,
-    'description': fields.String
-}
-
-
 class AccountResource(Resource):
     def __init__(self):
-        # reqparse to ensure well-formed arguments passed by the request
-        self.reqparse = reqparse.RequestParser()
-        self.reqparse.add_argument('name', type=str, location='json')
-        self.reqparse.add_argument('type', type=str, location='json')
-        self.reqparse.add_argument('description', type=str, location='json')
-        super(AccountResource, self).__init__()
+        self.schema = AccountSchema()
 
-    @marshal_with(account_fields)
     def get(self, id):
         """
         :param   id
@@ -37,7 +22,7 @@ class AccountResource(Resource):
         account = Account.query.filter_by(id=int(id)).first()
         if not account:
             abort(404, message="Account {0} doesn't exist".format(id))
-        return account
+        return self.schema.dump(account)
 
     def delete(self, id):
         """
@@ -51,7 +36,6 @@ class AccountResource(Resource):
             db.session.commit()
         return '', 204
 
-    @marshal_with(account_fields)
     def put(self, id):
         """
         :param   id
@@ -63,26 +47,14 @@ class AccountResource(Resource):
         if not account:
             abort(404, message="Account doesn't exist")
 
-        args = self.reqparse.parse_args()
-        account_dict = {}
-        for k, v in args.iteritems():
-            if v is not None:
-                account_dict[k] = v
-                account.__setattr__(k, v)
+        data = request.json
+        updated_account = self.schema.load(data, instance=account)
 
         db.session.commit()
-        return account, 201
+        return self.schema.dump(account), 201
 
 
 class AccountListResource(Resource):
-
-    def __init__(self):
-        self.reqparse = reqparse.RequestParser()
-        self.reqparse.add_argument('nr', type=str, required=True, location='json')
-        self.reqparse.add_argument('name', type=str, required=True, location='json')
-        self.reqparse.add_argument('type', type=str, location='json')
-        self.reqparse.add_argument('description', type=str, location='json')
-        super(AccountListResource, self).__init__()
 
     @marshal(AccountSchema(many=True))
     @paginate('accounts')
@@ -94,22 +66,21 @@ class AccountListResource(Resource):
         """
         return Account.query
 
-    @marshal_with(account_fields)
     def post(self):
         """
         :param
         :return: account as JSON: {'id': '', 'name': '', 'description': ''}
                  REST status code: 201
         """
-        args = self.reqparse.parse_args(req=request)
-        account_dict = {}
-        for k, v in args.iteritems():
-            if v is not None:
-                account_dict[k] = v
-        account = Account(**account_dict)
+        data = request.json
+
+        schema = AccountSchema()
+        result = schema.load(data)
+        account = result.data
+
         db.session.add(account)
         db.session.commit()
-        return account, 201
+        return schema.dump(account), 201
 
     def get_url(self):
         return request.url_root[:-1] + url_for('accounts')

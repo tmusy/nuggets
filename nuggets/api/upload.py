@@ -5,7 +5,6 @@ from flask_restful import fields, Resource, marshal_with, abort, reqparse
 from werkzeug.utils import secure_filename
 
 from nuggets.lib.parser import extract_transactions, extract_transactions_cs
-from nuggets.api.account import account_fields
 from nuggets.utils import allowed_file
 
 
@@ -17,8 +16,8 @@ transaction_fields = {
     'date': fields.DateTime,
     'name': fields.String,
     'description': fields.String,
-    'credit': fields.List(fields.Nested(account_fields)),
-    'debit': fields.List(fields.Nested(account_fields))
+#    'credit': fields.List(fields.Nested(account_fields)),
+#    'debit': fields.List(fields.Nested(account_fields))
 }
 
 
