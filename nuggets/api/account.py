@@ -1,9 +1,12 @@
 #!flask/bin/python
 from flask import request, url_for
-from flask_restful import fields, Resource, marshal_with, abort, reqparse, marshal
+from flask_restful import fields, Resource, marshal_with, abort, reqparse
+from sqlalchemy import desc
 
-from nuggets.models import Account
+from nuggets.models import Account, Trx
 from nuggets.extensions import db
+from nuggets.schemas import AccountSchema, TrxSchema
+from nuggets.decorators import paginate, marshal
 
 
 account_fields = {
@@ -19,9 +22,9 @@ class AccountResource(Resource):
     def __init__(self):
         # reqparse to ensure well-formed arguments passed by the request
         self.reqparse = reqparse.RequestParser()
-        self.reqparse.add_argument('name', type=unicode, location='json')
-        self.reqparse.add_argument('type', type=unicode, location='json')
-        self.reqparse.add_argument('description', type=unicode, location='json')
+        self.reqparse.add_argument('name', type=str, location='json')
+        self.reqparse.add_argument('type', type=str, location='json')
+        self.reqparse.add_argument('description', type=str, location='json')
         super(AccountResource, self).__init__()
 
     @marshal_with(account_fields)
@@ -75,43 +78,21 @@ class AccountListResource(Resource):
 
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
-        self.reqparse.add_argument('nr', type=unicode, required=True, location='json')
-        self.reqparse.add_argument('name', type=unicode, required=True, location='json')
-        self.reqparse.add_argument('type', type=unicode, location='json')
-        self.reqparse.add_argument('description', type=unicode, location='json')
+        self.reqparse.add_argument('nr', type=str, required=True, location='json')
+        self.reqparse.add_argument('name', type=str, required=True, location='json')
+        self.reqparse.add_argument('type', type=str, location='json')
+        self.reqparse.add_argument('description', type=str, location='json')
         super(AccountListResource, self).__init__()
 
-#    @marshal_with(account_fields)
+    @marshal(AccountSchema(many=True))
+    @paginate('accounts')
     def get(self):
         """
         :param
         :return: accounts as JSON: [{'id': '', 'name': '', 'description': ''},...]
                  REST status code: 200
         """
-        args = request.args
-        page_num = int(args.get('page'))
-        page_size = int(args.get('pageSize'))
-        res = Account.query.order_by(Account.id).paginate(page=page_num, per_page=page_size, error_out=True)
-        accounts = res.items
-        res_dict = {
-            '_links': {
-                'self': {'href': self.get_url() + '?page={}'.format(res.page)},
-                'first': {'href': self.get_url()},
-                'prev': {'href': self.get_url() + '?page={}'.format(res.prev_num)},
-                'next': {'href': self.get_url() + '?page={}'.format(res.next_num)},
-                'last': {'href': self.get_url() + '?page={}'.format(res.pages)}
-            },
-            '_embedded': {
-                'items': marshal(accounts, account_fields),
-            },
-            'total': res.total,
-            'count': res.per_page,
-            'page_count': res.pages
-        }
-
-        if not accounts:
-            abort(404, message="No Accounts available")
-        return res_dict, 200
+        return Account.query
 
     @marshal_with(account_fields)
     def post(self):
@@ -136,45 +117,14 @@ class AccountListResource(Resource):
 
 class AccountTransactionListResource(Resource):
 
-    def __init__(self):
-        self.reqparse = reqparse.RequestParser()
-        self.reqparse.add_argument('nr', type=unicode, required=True, location='json')
-        self.reqparse.add_argument('name', type=unicode, required=True, location='json')
-        self.reqparse.add_argument('type', type=unicode, location='json')
-        self.reqparse.add_argument('description', type=unicode, location='json')
-        super(AccountListResource, self).__init__()
-
-    #    @marshal_with(account_fields)
-    def get(self):
+    @marshal(TrxSchema(many=True))
+    @paginate('transactions')
+    def get(self, id):
         """
         :param
         :return: transactions as JSON: [{'id': '', 'amount': 0, 'currency': '',
         'date': datetime, 'name': '', 'description': ''},...]
                  REST status code: 200
         """
-        # args = request.args
-        # page_num = int(args.get('page'))
-        # page_size = int(args.get('pageSize'))
-        # res = Trx.query.order_by(desc(Trx.id)).paginate(page=page_num, per_page=page_size, error_out=True)
-        # transactions = res.items
-        # res_dict = {
-        #     '_links': {
-        #         'self': {'href': self.get_url()+'?page={}'.format(res.page)},
-        #         'first': {'href': self.get_url()},
-        #         'prev': {'href': self.get_url()+'?page={}'.format(res.prev_num)},
-        #         'next': {'href': self.get_url()+'?page={}'.format(res.next_num)},
-        #         'last': {'href': self.get_url()+'?page={}'.format(res.pages)}
-        #     },
-        #     '_embedded': {
-        #         'items': marshal(transactions, transaction_fields),
-        #     },
-        #     'total': res.total,
-        #     'count': res.per_page,
-        #     'page_count': res.pages
-        # }
-        #
-        # #transactions = Trx.query.order_by('date').all()
-        # if not transactions:
-        #     abort(404, message="No Transactions available")
-        #
-        # return res_dict, 200  # create pagination, now its just delivering 20 items
+        res = Trx.query.filter((Trx.credit_id == id) | (Trx.debit_id == id)).order_by(desc(Trx.id))
+        return res

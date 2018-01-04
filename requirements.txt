@@ -1,8 +1,10 @@
-nose
 Flask
 Flask_RESTful
 Flask-Script
 Flask-SQLAlchemy
+Flask-Cors
+psycopg2
+marshmallow
 
 # Application server for both development and production.
 gunicorn==19.4.5

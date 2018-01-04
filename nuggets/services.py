@@ -1,4 +1,4 @@
-from models import Trx
+from .models import Trx
 from nuggets.extensions import db
 
 

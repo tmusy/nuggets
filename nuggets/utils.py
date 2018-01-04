@@ -67,14 +67,14 @@ def make_dir(dir_path):
     try:
         if not os.path.exists(dir_path):
             os.mkdir(dir_path)
-    except Exception, e:
+    except Exception as e:
         raise e
 
 
 def unicode_csv_reader(utf8_data, delimiter=',', **kwargs):
     csv_reader = csv.reader(utf8_data, delimiter=delimiter, **kwargs)
     for row in csv_reader:
-        yield [unicode(cell, 'utf-8') for cell in row]
+        yield [cell for cell in row]
 
 
 def utf_8_encoder(unicode_csv_data):

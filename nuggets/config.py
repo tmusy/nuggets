@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 
-from utils import make_dir
+from .utils import make_dir
 
 
 class BaseConfig(object):

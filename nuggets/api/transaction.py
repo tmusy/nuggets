@@ -28,10 +28,10 @@ class TransactionResource(Resource):
         # reqparse to ensure well-formed arguments passed by the request
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument('amount', type=float, location='json')
-        self.reqparse.add_argument('currency', type=unicode, location='json')
-        self.reqparse.add_argument('date', type=unicode, location='json')
-        self.reqparse.add_argument('name', type=unicode, location='json')
-        self.reqparse.add_argument('description', type=unicode, location='json')
+        self.reqparse.add_argument('currency', type=str, location='json')
+        self.reqparse.add_argument('date', type=str, location='json')
+        self.reqparse.add_argument('name', type=str, location='json')
+        self.reqparse.add_argument('description', type=str, location='json')
         super(TransactionResource, self).__init__()
 
     @marshal_with(transaction_fields)
@@ -89,14 +89,14 @@ class TransactionListResource(Resource):
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument('amount', type=float, required=True, location='json')
-        self.reqparse.add_argument('currency', type=unicode, location='json')
-        self.reqparse.add_argument('date', type=unicode, location='json')
-        self.reqparse.add_argument('name', type=unicode, location='json')
-        self.reqparse.add_argument('description', type=unicode, location='json')
+        self.reqparse.add_argument('currency', type=str, location='json')
+        self.reqparse.add_argument('date', type=str, location='json')
+        self.reqparse.add_argument('name', type=str, location='json')
+        self.reqparse.add_argument('description', type=str, location='json')
         self.reqparse.add_argument('debit', type=dict, location='json')
 
         self.p_reqparse = reqparse.RequestParser()
-        self.p_reqparse.add_argument('page', type=unicode, location='path')
+        self.p_reqparse.add_argument('page', type=str, location='path')
 
         super(TransactionListResource, self).__init__()
 
