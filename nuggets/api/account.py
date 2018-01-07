@@ -5,7 +5,7 @@ from sqlalchemy import desc
 
 from nuggets.models import Account, Trx
 from nuggets.extensions import db
-from nuggets.schemas import AccountSchema, TrxSchema
+from nuggets.schemas import AccountSchema, TrxByAccountSchema
 from nuggets.decorators import paginate, marshal
 
 
@@ -88,7 +88,7 @@ class AccountListResource(Resource):
 
 class AccountTransactionListResource(Resource):
 
-    @marshal(TrxSchema(many=True))
+    @marshal(TrxByAccountSchema(many=True))
     @paginate('transactions')
     def get(self, id):
         """

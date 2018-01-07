@@ -58,7 +58,6 @@ class TransactionResource(Resource):
             db.session.commit()
         return '', 204
 
-    @marshal_with(transaction_fields)
     def put(self, id):
         """
         :param   id
@@ -66,21 +65,16 @@ class TransactionResource(Resource):
         :return: transaction as JSON: {'id': '', 'amount': 0, 'currency': '', 'name': '', 'description': ''}
                  REST status ok code: 201
         """
+        data = request.json
+
         transaction = Trx.query.filter_by(id=int(id)).first()
         if not transaction:
             abort(404, message="Transaction doesn't exist")
 
-        args = self.reqparse.parse_args()
-        transaction_dict = {}
-        for k, v in args.iteritems():
-            if v is not None:
-                if k == 'date':
-                    v = dateutil.parser.parse(v)
-                transaction_dict[k] = v
-                transaction.__setattr__(k, v)
-
+        schema = TrxSchema()
+        trx, errors = schema.load(data, instance=transaction, session=db.session)
         db.session.commit()
-        return transaction, 201
+        return schema.dump(trx), 201
 
 
 class TransactionListResource(Resource):
