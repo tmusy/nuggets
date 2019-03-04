@@ -57,7 +57,7 @@ class AccountResource(Resource):
 class AccountListResource(Resource):
 
     @marshal(AccountSchema(many=True))
-    @paginate('accounts')
+    @paginate(50)
     def get(self):
         """
         :param
@@ -89,7 +89,7 @@ class AccountListResource(Resource):
 class AccountTransactionListResource(Resource):
 
     @marshal(TrxByAccountSchema(many=True))
-    @paginate('transactions')
+    @paginate()
     def get(self, id):
         """
         :param

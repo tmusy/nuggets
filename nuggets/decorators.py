@@ -20,7 +20,7 @@ def marshal(schema):
     return decorator
 
 
-def paginate(collection):
+def paginate(page_size=20):
     """Generate a paginated response for a resource collection.
 
     Routes that use this decorator must return a SQLAlchemy query as a
@@ -38,10 +38,11 @@ def paginate(collection):
 
             # obtain pagination arguments from the URL's query string
             page = request.args.get('page', 1, type=int)
-            per_page = request.args.get('pageSize', 20, type=int)
+            per_page = request.args.get('pageSize', page_size, type=int)
 
             # run the query with Flask-SQLAlchemy's pagination
             p = query.paginate(page, per_page)
+
 
             # build the pagination
             res_dict = {

@@ -1,4 +1,5 @@
 #!flask/bin/python
+import datetime
 import dateutil.parser
 from flask import request
 from flask_restful import fields, Resource, marshal_with, abort, reqparse, url_for
@@ -102,7 +103,12 @@ class TransactionListResource(Resource):
         'date': datetime, 'name': '', 'description': ''},...]
                  REST status code: 200
         """
-        return Trx.query.order_by(desc(Trx.id))
+        from_date = request.args.get('from', None, type=lambda d: datetime.strptime(d, '%Y%m%d'))
+        to_date = request.args.get('to', None, type=lambda d: datetime.strptime(d, '%Y%m%d'))
+
+        if from_date and to_date:
+            return Trx.query.filter(Trx.date.between(from_date, to_date)).order_by(desc(Trx.date))
+        return Trx.query.order_by(desc(Trx.date))
 
     @marshal_with(transaction_fields)
     def post(self):

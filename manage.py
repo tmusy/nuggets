@@ -4,7 +4,7 @@ from flask_script import Manager
 
 from nuggets import create_app
 from nuggets.extensions import db
-from nuggets.models import Account
+from nuggets.models import Account, Trx
 from nuggets.services import calculate_all_saldos
 
 app = create_app()
@@ -17,6 +17,19 @@ def run():
 
     app.run()
 #    calculate_all_saldos()
+
+    for trx in Trx.query.all():
+        suggest = trx.suggest_account()
+        if suggest.get('credit'):
+            trx.credit = suggest.get('credit')
+            trx.credit_id = suggest.get('credit').id
+            db.session.commit()
+        if suggest.get('debit'):
+            trx.debit = suggest.get('debit')
+            trx.debit_id = suggest.get('debit').id
+            db.session.commit()
+        print(trx)
+        print(suggest)
 
 
 @manager.command
